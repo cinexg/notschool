@@ -1,23 +1,23 @@
-# 🚀 Notschool OS 
+# Notschool
 
-**An Autonomous, Multi-Agent Learning Architect**
+**Multi-Agent Learning Architect**
 *Built for the Google Gen AI Academy APAC 2026 Hackathon (Track 1: Agentic AI)*
 
-## 📖 The Vision
-Most AI tools just answer questions. **Notschool OS** builds complete, actionable learning systems. 
+## Overview
+Most AI educational tools act as simple question-answering bots. Notschool OS is designed to build complete, actionable learning systems. 
 
-A user uploads a photo of a textbook index or handwritten syllabus. Our system uses Gemini's multimodal reasoning to read it, breaks it down into a structured daily curriculum, automatically finds the best YouTube tutorials for each topic, and schedules the study sessions (and a final exam) directly into the user's Google Calendar. 
+When a user uploads a photo of a textbook index or a handwritten syllabus, the system uses multimodal reasoning to read it. It then breaks the content down into a daily curriculum, finds the best YouTube tutorials for each topic, and schedules the study sessions directly into the user's Google Calendar.
 
-### Hackathon Rubric Alignment 🏆
+### Hackathon Alignment
 - [x] **Primary Agent + Sub-Agents:** LangGraph orchestrates the Architect, Librarian, and Scheduler agents.
-- [x] **Store/Retrieve Structured Data:** SQLite implementation tracking course progression.
-- [x] **Integrate Tools via MCP:** YouTube API (Content) & Google Calendar API (Scheduling).
-- [x] **Multi-Step Workflows:** Upload ➡️ Scan ➡️ Draft ➡️ Save ➡️ Schedule.
-- [x] **API-based System:** Core logic operates as backend Python functions separate from the frontend.
+- [x] **Store/Retrieve Structured Data:** SQLite tracks course progression and user data.
+- [x] **Integrate Tools via MCP:** Utilizes YouTube API (Content) and Google Calendar API (Scheduling).
+- [x] **Multi-Step Workflows:** Upload -> Scan -> Draft -> Save -> Schedule.
+- [x] **API-based System:** Core logic operates as backend Python functions.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 - **Orchestrator:** `langgraph`
 - **LLM Engine:** `gemini-1.5-pro` (via `google-genai` SDK)
 - **Frontend UI:** `streamlit` 
@@ -26,31 +26,31 @@ A user uploads a photo of a textbook index or handwritten syllabus. Our system u
 
 ---
 
-## 🧠 System Architecture (The "Loop")
+## System Architecture
 
-We utilize a LangGraph State machine. The `NotschoolState` dictionary is passed between agents:
+We use a LangGraph state machine to handle the workflow. Information is passed between agents using a shared state dictionary:
 
-1. **The Input:** User drops an image into the UI with a timeframe constraint.
-2. **The Architect (Gemini Vision):** Scans the image, validates the request, and outputs a strict JSON object mapping days to specific topics.
-3. **The Librarian (Tool Calling):** Reads the JSON, hits the YouTube API, and appends actual Video URLs to the curriculum data.
-4. **The Database Agent:** Saves the complete generated syllabus to local SQLite.
-5. **The Scheduler (Tool Calling):** Hits the Google Calendar API, creates calendar events for each study day, and schedules a "Final Exam" 24 hours after completion.
+1. **Input:** The user uploads an image with a specific timeframe constraint.
+2. **The Architect (Vision Agent):** Scans the image, validates the request, and outputs a JSON object mapping the days to specific topics.
+3. **The Librarian (Tool Agent):** Reads the JSON, searches the YouTube API, and appends relevant tutorial URLs to the curriculum.
+4. **The Database Agent:** Saves the complete generated syllabus to a local SQLite database.
+5. **The Scheduler (Tool Agent):** Connects to the Google Calendar API, creates events for each study day, and schedules a final exam 24 hours after completion.
 
 ---
 
-## 💻 Quick Start & Setup
+## Setup Instructions
 
 ### Prerequisites
-You will need API keys for:
+You will need API keys for the following services:
 1. Google AI Studio (Gemini)
-2. YouTube Data API v3 (Google Cloud Console)
+2. YouTube Data API v3 
 3. Google Calendar API (OAuth 2.0 Client ID)
 
 ### Installation
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/your-username/notschool-os.git](https://github.com/your-username/notschool-os.git)
+   git clone [https://github.com/cinexg/notschool-os.git](https://github.com/cinexg/notschool-os.git)
    cd notschool-os
    ```
 
@@ -64,7 +64,7 @@ You will need API keys for:
    ```env
    GEMINI_API_KEY="your_gemini_key_here"
    YOUTUBE_API_KEY="your_youtube_key_here"
-   # Ensure your Calendar OAuth JSON file is in the root directory
+   # Place your Calendar OAuth JSON file in the root directory
    ```
 
 4. **Run the Application:**
@@ -74,11 +74,8 @@ You will need API keys for:
 
 ---
 
-## 👥 Division of Labor
+## Team Roles
 
-- **Lead AI Engineer [Name]:** LangGraph state machine, Gemini SDK implementation, JSON prompting.
-- **API Integration Lead [Name]:** YouTube/Calendar API tool functions.
-- **Frontend/DB Lead [Name]:** Streamlit UI, custom CSS, and SQLite setup.
-
----
-*Developed by Team [Your Team Name] - April 2026*
+- **Lead AI Engineer [Name]:** Manages the LangGraph state machine, Gemini SDK implementation, and agent prompts.
+- **API Integration Lead [Name]:** Handles YouTube and Calendar API connections and tool functions.
+- **Frontend & Database Lead [Name]:** Develops the Streamlit UI and sets up the SQLite database schema.
