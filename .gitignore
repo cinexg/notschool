@@ -1,0 +1,41 @@
+# ==========================================
+# Notschool OS - Git Ignore Policy
+# ==========================================
+
+# 1. Environment & Secrets (CRITICAL)
+# Never commit API keys or OAuth tokens
+.env
+token.json
+credentials.json
+
+# 2. Virtual Environments
+# Let each developer build their own local environment
+venv/
+env/
+.venv/
+*/venv/
+
+# 3. Database Files
+# We do not want to track local state or test data
+*.db
+*.sqlite
+*.sqlite3
+notschool.db
+
+# 4. Python Compilation Artifacts
+# Automatically generated, no need to track
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 5. OS & IDE Specific Files
+# Prevent noise from different developers' machines
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# 6. Streamlit Cache (Optional but recommended)
+.streamlit/
