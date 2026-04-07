@@ -1,0 +1,19 @@
+# Security (CRITICAL)
+.env
+
+# Local virtual environments
+venv/
+env/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Git and OS files
+.git/
+.gitignore
+.DS_Store
+
+# Do NOT ignore token.json or credentials.json!

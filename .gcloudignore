@@ -1,0 +1,9 @@
+# Exclude these from Google Cloud Build
+.env
+venv/
+__pycache__/
+*.pyc
+.git/
+.DS_Store
+
+# Notice that token.json and credentials.json are NOT listed here!

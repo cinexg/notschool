@@ -24,12 +24,18 @@ def architect_node(state: NotschoolState) -> dict:
 
     # 3. Define the system instructions context
     prompt = f"""
-    You are the Principal Architect for Notschool, an elite coaching platform dedicated to skills and studies.
-    Your task is to design a highly actionable, 3-step learning curriculum for the following goal: "{goal}"
-    
-    If the user provided an image (like a syllabus or diagram), analyze it deeply and base your curriculum on its contents.
-    Provide concise, precise module names and generate highly optimized YouTube search queries for each.
-    """
+        You are the Principal Architect for Notschool, an elite coaching platform dedicated to skills and studies.
+        Your task is to design a highly actionable, 3-step learning curriculum for the following goal: "{goal}"
+        
+        If the user provided an image (like a syllabus or diagram), analyze it deeply and base your curriculum on its contents.
+        
+        You MUST return EXACTLY this JSON structure and nothing else:
+        {{
+            "title": "The Course Title",
+            "modules": ["Module 1 string", "Module 2 string", "Module 3 string"],
+            "search_queries": ["Specific YouTube search 1", "Specific YouTube search 2", "Specific YouTube search 3"]
+        }}
+        """
 
     contents = [prompt]
     
@@ -40,17 +46,16 @@ def architect_node(state: NotschoolState) -> dict:
         )
 
     try:
-        # We use Gemini 2.5 Flash for complex multimodal reasoning
-        response = client.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=contents,
-                    config=types.GenerateContentConfig(
-                        temperature=0.2, 
-                        response_mime_type="application/json",
-                    )
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    temperature=0.2, 
+                    response_mime_type="application/json",
                 )
+            )
 
-        curriculum = json.loads(response.text)
+            curriculum = json.loads(response.text)
 
     except Exception as e:
         print(f"Architect Node Error: {e}")

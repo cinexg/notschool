@@ -6,10 +6,23 @@
     <title>Notschool OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom scrollbar for a sleek OS feel */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-track { background: #111827; }
         ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+        
+        /* Custom UI Enhancements */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+        
+        .glass-panel {
+            background: rgba(31, 41, 55, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen p-6 md:p-12 font-sans selection:bg-blue-500 selection:text-white">
@@ -46,9 +59,11 @@
             </button>
         </form>
 
-        <div id="loader" class="hidden mt-10 text-center">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-3"></div>
-            <p class="text-blue-400 font-medium animate-pulse">LangGraph Orchestrating Agents... Please wait.</p>
+        <div id="loader" class="hidden mt-10 text-center animate-fade-in-up">
+            <div class="inline-flex items-center justify-center space-x-3 bg-gray-900 border border-blue-500/50 py-3 px-6 rounded-full shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-400"></div>
+                <p id="loaderText" class="text-blue-400 font-medium tracking-wide text-sm">Initializing Architect Node...</p>
+            </div>
         </div>
 
         <div id="errorState" class="hidden mt-8 bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-xl">
@@ -100,13 +115,28 @@
             formData.append('goal', document.getElementById('goal').value);
             
             const fileInput = document.getElementById('image');
-            if(fileInput.files[0]) {
+            // Safer check for file existence
+            if(fileInput.files && fileInput.files.length > 0) {
                 formData.append('image', fileInput.files[0]);
             }
 
+            // Dynamic Loader Text Interval
+            const loaderText = document.getElementById('loaderText');
+            const agentStatuses = [
+                "Architect analyzing request...", 
+                "Librarian querying YouTube API...", 
+                "Scheduler calculating calendar slots...",
+                "Database syncing state..."
+            ];
+            let statusIndex = 0;
+            const statusInterval = setInterval(() => {
+                statusIndex = (statusIndex + 1) % agentStatuses.length;
+                if(loaderText) loaderText.textContent = agentStatuses[statusIndex];
+            }, 1800);
+
             try {
-                // Ensure your FastAPI backend is running on port 8000
-                const response = await fetch('http://localhost:8000/api/generate', {
+                // Relative path is MANDATORY for Cloud Run deployment
+                const response = await fetch('/api/generate', {
                     method: 'POST',
                     body: formData
                 });
@@ -119,14 +149,16 @@
                     // 1. Set Title
                     document.getElementById('courseTitle').textContent = data.curriculum_json.title;
                     
-                    // 2. Render Modules
+                    // 2. Render Modules with premium Glassmorphism UI
                     const modulesDiv = document.getElementById('modulesList');
                     modulesDiv.innerHTML = '';
                     data.curriculum_json.modules.forEach((mod, index) => {
                         modulesDiv.innerHTML += `
-                            <div class="bg-gray-900 border border-gray-700 p-4 rounded-xl shadow-inner">
-                                <div class="text-xs text-emerald-500 font-bold uppercase tracking-wider mb-1">Module ${index + 1}</div>
-                                <div class="text-gray-200">${mod}</div>
+                            <div class="glass-panel p-5 rounded-xl shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 transform hover:-translate-y-1 border-l-4 border-l-emerald-500">
+                                <div class="text-xs text-emerald-400 font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
+                                    <span class="bg-emerald-500/10 px-2 py-1 rounded">Module ${index + 1}</span>
+                                </div>
+                                <div class="text-gray-200 leading-relaxed">${mod}</div>
                             </div>`;
                     });
 
@@ -160,14 +192,15 @@
                     // Show results
                     results.classList.remove('hidden');
                 } else {
-                    throw new Error(jsonResponse.message || "Unknown API Error");
+                    throw new Error(jsonResponse.detail || "Unknown API Error");
                 }
             } catch (error) {
                 document.getElementById('errorMessage').textContent = error.message === "Failed to fetch" 
-                    ? "Network error. Is the FastAPI server running on port 8000?" 
+                    ? "Network error. Is the FastAPI server running?" 
                     : error.message;
                 errorState.classList.remove('hidden');
             } finally {
+                clearInterval(statusInterval);
                 loader.classList.add('hidden');
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
