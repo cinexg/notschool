@@ -1,7 +1,10 @@
 from fastapi import FastAPI, Form, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from datetime import datetime
 import pytz
+import os
 
 # 1. LOAD CONFIG FIRST: This reads the .env file into memory
 from core.config import validate_environment
@@ -20,6 +23,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+async def serve_frontend():
+    """Serve the frontend UI"""
+    frontend_path = os.path.join(os.path.dirname(__file__), "frontend", "index.html")
+    return FileResponse(frontend_path)
 
 @app.post("/api/generate")
 async def generate_learning_path(

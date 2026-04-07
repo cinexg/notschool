@@ -27,7 +27,7 @@ def search_youtube_videos(queries: List[str], max_results_per_query: int = 1) ->
 
             for item in response.get('items', []):
                 video_id = item['id']['videoId']
-                video_urls.append(f"[https://www.youtube.com/watch?v=](https://www.youtube.com/watch?v=){video_id}")
+                video_urls.append(f"https://www.youtube.com/watch?v={video_id}")
                 
         except Exception as e:
             print(f"YouTube API Error for query '{query}': {e}")
