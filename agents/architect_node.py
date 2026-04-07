@@ -40,9 +40,9 @@ def architect_node(state: NotschoolState) -> dict:
         )
 
     try:
-        # We use Gemini 1.5 Pro for complex multimodal reasoning
+        # We use Gemini 2.5 Flash for complex multimodal reasoning
         response = client.models.generate_content(
-                    model='gemini-1.5-flash',
+                    model='gemini-2.5-flash',
                     contents=contents,
                     config=types.GenerateContentConfig(
                         temperature=0.2, 
