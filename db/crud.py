@@ -1,28 +1,21 @@
 import sqlite3
 import json
-from typing import Dict, Any
+from typing import Dict, Any, List
+from db.schema import CREATE_LEARNING_PATHS_TABLE
 
 DB_PATH = "notschool.db"
 
 def init_db():
-    """Run this once to establish the schema."""
+    """Initializes the SQLite schema on startup."""
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS learning_paths (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                goal TEXT NOT NULL,
-                curriculum JSON,
-                resources JSON,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        cursor.execute(CREATE_LEARNING_PATHS_TABLE)
         conn.commit()
 
-def save_learning_path(goal: str, curriculum: Dict[str, Any], resources: list[str]) -> int:
+def save_learning_path(goal: str, curriculum: Dict[str, Any], resources: List[str]) -> int:
     """
-    Pure database insert function. 
-    Can be tested completely independently of the LLM pipeline.
+    Inserts a newly generated curriculum into the SQLite database.
+    Returns the primary key ID of the inserted row.
     """
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()

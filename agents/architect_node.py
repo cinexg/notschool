@@ -1,58 +1,66 @@
-import json
 import os
+import json
 from google import genai
 from google.genai import types
 from core.state import NotschoolState
-
-# The client automatically picks up GEMINI_API_KEY from the environment
-client = genai.Client()
+from db.schema import CurriculumModel
 
 def architect_node(state: NotschoolState) -> dict:
     """
-    Acts as the Principal Curriculum Designer for the skills and studies platform.
+    Acts as the Principal Curriculum Designer.
     Uses Gemini 1.5 Pro to process text and images into a structured JSON syllabus.
     """
+    # 1. Initialize the client INSIDE the function (Lazy Initialization)
+    # This ensures the .env file is 100% loaded before the SDK looks for the key
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY is missing from the environment!")
+        
+    client = genai.Client(api_key=api_key)
+
+    # 2. Extract state
     goal = state["goal"]
     image_bytes = state.get("image_bytes")
 
+    # 3. Define the system instructions context
     prompt = f"""
-    You are an expert curriculum architect for an elite coaching platform.
-    Design a 3-step learning curriculum for the following goal: {goal}
+    You are the Principal Architect for Notschool, an elite coaching platform dedicated to skills and studies.
+    Your task is to design a highly actionable, 3-step learning curriculum for the following goal: "{goal}"
     
-    You must return a raw JSON object with the following schema:
-    {{
-        "title": "Course Title",
-        "modules": ["Module 1", "Module 2", "Module 3"],
-        "search_queries": ["query 1", "query 2", "query 3"]
-    }}
-    Do not include markdown formatting like ```json.
+    If the user provided an image (like a syllabus or diagram), analyze it deeply and base your curriculum on its contents.
+    Provide concise, precise module names and generate highly optimized YouTube search queries for each.
     """
 
     contents = [prompt]
     
-    # If the user uploaded a syllabus or diagram, append it to the multimodal prompt
+    # If the user uploaded an image, append it to the multimodal prompt
     if image_bytes:
         contents.append(
-            types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+            types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg") 
         )
-
-    # We use Gemini 1.5 Pro for complex reasoning and schema adherence
-    response = client.models.generate_content(
-        model='gemini-1.5-pro',
-        contents=contents,
-        config=types.GenerateContentConfig(
-            temperature=0.2, # Low temperature for structured output
-        )
-    )
 
     try:
-        curriculum = json.loads(response.text.strip())
-    except json.JSONDecodeError:
-        # Fallback error handling for the hackathon
-        curriculum = {"title": "Error generating curriculum", "modules": [], "search_queries": [goal]}
+        # We use Gemini 1.5 Pro for complex multimodal reasoning
+        response = client.models.generate_content(
+                    model='gemini-1.5-flash',
+                    contents=contents,
+                    config=types.GenerateContentConfig(
+                        temperature=0.2, 
+                        response_mime_type="application/json",
+                    )
+                )
 
-    # LangGraph automatically merges this dictionary into the NotschoolState
+        curriculum = json.loads(response.text)
+
+    except Exception as e:
+        print(f"Architect Node Error: {e}")
+        curriculum = {
+            "title": "Fallback: Error generating curriculum", 
+            "modules": ["Understand the basics", "Practice concepts", "Build a project"], 
+            "search_queries": [f"{goal} tutorial for beginners"]
+        }
+
     return {
         "curriculum_json": curriculum,
-        "messages": [{"role": "system", "content": "Architect completed the curriculum design."}]
+        "messages": [{"role": "system", "content": "Architect successfully designed the skills and studies curriculum."}]
     }

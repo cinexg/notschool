@@ -1,17 +1,17 @@
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import StateGraph, END
 from core.state import NotschoolState
 
-# Import the isolated node functions. 
-# Your AI/API engineers will build the actual logic inside these files.
+# Import the isolated node functions from the agents directory
 from agents.architect_node import architect_node
 from agents.librarian_node import librarian_node
 from agents.scheduler_node import scheduler_node
 from agents.db_node import db_node
 
-def build_notschool_graph() -> StateGraph:
+def build_notschool_graph():
     """
     Compiles the LangGraph state machine.
     """
+    # Initialize the graph with our strict schema
     workflow = StateGraph(NotschoolState)
 
     # 1. Register the Nodes (The "Workers")
@@ -21,8 +21,9 @@ def build_notschool_graph() -> StateGraph:
     workflow.add_node("db_saver", db_node)
 
     # 2. Define the Edges (The "Workflow")
-    # This is a linear path, but you can easily add conditional_edges here later
-    workflow.add_edge(START, "architect")
+    # For langgraph v0.0.26, we define the start using set_entry_point()
+    workflow.set_entry_point("architect")
+    
     workflow.add_edge("architect", "librarian")
     workflow.add_edge("librarian", "scheduler")
     workflow.add_edge("scheduler", "db_saver")
@@ -31,5 +32,5 @@ def build_notschool_graph() -> StateGraph:
     # Compile into an executable application
     return workflow.compile()
 
-# Expose the compiled instance so the UI can import it cleanly
+# Expose the compiled instance so the FastAPI server can invoke it
 notschool_app = build_notschool_graph()

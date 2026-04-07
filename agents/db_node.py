@@ -3,8 +3,7 @@ from db.crud import save_learning_path
 
 def db_node(state: NotschoolState) -> dict:
     """
-    Extracts the finalized learning path from the LangGraph state 
-    and persists it to the SQLite database.
+    Extracts the finalized learning path from the state and persists it to SQLite.
     """
     goal = state["goal"]
     curriculum = state.get("curriculum_json", {})
@@ -12,8 +11,9 @@ def db_node(state: NotschoolState) -> dict:
 
     try:
         record_id = save_learning_path(goal, curriculum, resources)
-        msg = f"Successfully saved to database with ID: {record_id}"
+        msg = f"Successfully saved state to database with ID: {record_id}"
     except Exception as e:
+        print(f"Database Node Error: {e}")
         record_id = None
         msg = f"Database save failed: {e}"
 

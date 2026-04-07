@@ -1,12 +1,8 @@
-pillow>=11.0.0
 # Orchestration & AI
 langgraph==0.0.26
 google-genai==0.3.0
 
-# Frontend
-streamlit==1.32.0
-
-# External Tools (YouTube & Calendar)
+# External Tools
 google-api-python-client==2.118.0
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.0
@@ -14,3 +10,8 @@ google-auth-oauthlib==1.2.0
 # Utilities
 python-dotenv==1.0.1
 pytz==2024.1
+
+# The New API Layer
+fastapi==0.110.0
+uvicorn==0.27.1
+python-multipart==0.0.9
