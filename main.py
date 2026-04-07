@@ -24,6 +24,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
+frontend_dir = os.path.join(os.path.dirname(__file__), "frontend")
+app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
+
+
 @app.get("/")
 async def serve_frontend():
     """Serve the frontend UI"""
