@@ -125,7 +125,7 @@
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" title="Choose a file">
                         <div class="absolute inset-0 z-10 flex items-center px-4 md:px-5 text-slate-600 dark:text-slate-400 font-medium">
                             <span class="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm mr-3 shadow-sm group-hover:bg-brand-orange group-hover:text-white transition-colors whitespace-nowrap">Choose File</span>
-                            <span class="truncate text-xs md:text-sm max-w-[140px] md:max-w-[200px]" id="fileNameDisplay">Upload syllabus...</span>
+                            <span class="truncate text-xs md:text-sm max-w-[140px] md:max-w-[200px]" id="fileNameDisplay">Upload syllabus or Diagram</span>
                         </div>
                     </div>
                 </div>
@@ -225,7 +225,7 @@
 
         // --- Custom File Input Display ---
         document.getElementById('image').addEventListener('change', function(e) {
-            const fileName = e.target.files[0] ? e.target.files[0].name : 'Upload syllabus...';
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Upload syllabus or Diagram';
             document.getElementById('fileNameDisplay').textContent = fileName;
         });
 
