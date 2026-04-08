@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Initialize a fresh SQLite database for the container
-RUN python -c "from db.crud import init_db; init_db()"
+RUN python -c "from db.schema import init_db; init_db()"
 
 # Command to run the application using Uvicorn
 # Cloud Run automatically injects the $PORT environment variable, so we must bind to it

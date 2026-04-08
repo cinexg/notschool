@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notschool</title>
+    <title>Notschool OS — AI Learning Architect</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -45,12 +48,27 @@
             }
         }
     </script>
+    
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: false, 
+            theme: 'base',
+            themeVariables: {
+                primaryColor: 'transparent',
+                primaryTextColor: '#F97316',
+                primaryBorderColor: '#FACC15',
+                lineColor: '#64748b',
+                secondaryColor: '#1e293b',
+                tertiaryColor: '#0f172a'
+            }
+        });
+    </script>
 
     <style>
         body { transition: background-color 0.5s ease; }
         
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
@@ -61,14 +79,6 @@
         .delay-200 { animation-delay: 200ms; }
         .delay-300 { animation-delay: 300ms; }
         
-        /* Input Autofill Override */
-        input:-webkit-autofill {
-            -webkit-box-shadow: 0 0 0 30px transparent inset !important;
-            transition: background-color 5000s ease-in-out 0s;
-        }
-        .dark input:-webkit-autofill { -webkit-text-fill-color: white !important; }
-        input:-webkit-autofill { -webkit-text-fill-color: #0f172a !important; }
-
         /* Subtle Dot Grid Background */
         .bg-grid-pattern {
             background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px);
@@ -77,9 +87,33 @@
         .dark .bg-grid-pattern {
             background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
         }
+
+        /* Drag active state */
+        .drag-active { border-color: #F97316 !important; background-color: rgba(249,115,22,0.05) !important; }
+
+        /* Agent Active Glow */
+        @keyframes agent-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.4); border-color: rgba(249,115,22,0.8); }
+            50% { box-shadow: 0 0 0 8px rgba(249,115,22,0); border-color: rgba(249,115,22,0.3); }
+        }
+        .agent-active { animation: agent-glow 1.5s ease-in-out infinite; }
+
+        /* General Utilities */
+        .glass-card {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+        .dark .glass-card {
+            background: rgba(15,23,42,0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .fade-in { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
     </style>
 </head>
-<body class="bg-brand-bgLight text-slate-900 dark:bg-brand-bgDark dark:text-white min-h-screen relative overflow-x-hidden selection:bg-brand-orange selection:text-white">
+<body class="bg-brand-bgLight text-slate-900 dark:bg-brand-bgDark dark:text-white min-h-screen relative overflow-x-hidden selection:bg-brand-orange selection:text-white pb-16">
 
     <div class="fixed top-4 right-4 md:top-8 md:right-8 z-50">
         <button id="themeToggle" class="p-2.5 md:p-3 rounded-full backdrop-blur-xl bg-white/60 dark:bg-black/60 border border-slate-200 dark:border-slate-800 shadow-lg text-slate-600 dark:text-slate-300 hover:text-brand-orange dark:hover:text-brand-yellow transition-all duration-300 hover:scale-110 group">
@@ -94,105 +128,183 @@
         <div class="absolute bottom-[-20%] left-[20%] w-[90vw] h-[90vw] md:w-[50vw] md:h-[50vw] bg-brand-red/10 dark:bg-brand-red/5 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] md:blur-[120px] animate-blob delay-200"></div>
     </div>
 
-    <div class="relative z-10 max-w-5xl mx-auto px-5 py-10 md:px-12 md:py-20 min-h-screen flex flex-col justify-center">
+    <div class="relative z-10 max-w-5xl mx-auto px-5 pt-10 md:pt-16">
         
-        <div class="mb-10 md:mb-16 animate-fade-in-up text-center md:text-left flex flex-col items-center md:items-start">
-            <div class="mb-5 md:mb-6">
-                <img src="/static/logo_notschool.svg" alt="Notschool Logo" class="h-20 md:h-28 dark:invert opacity-90 transition-all duration-300">
-            </div>
-            <p class="text-slate-700 dark:text-slate-300 text-base md:text-2xl font-semibold tracking-wide">Ditch the Classroom</p>
-        </div>
-
-        <form id="orchestratorForm" class="space-y-8 md:space-y-12 flex-grow w-full">
-            
-            <div class="animate-fade-in-up delay-100 group">
-                <label class="block text-[10px] md:text-sm font-bold text-brand-orange mb-2 md:mb-3 tracking-[0.2em] uppercase ml-1">Target Objective</label>
-                <div class="relative">
-                    <input type="text" id="goal" required 
-                        class="w-full bg-transparent border-b-2 border-slate-300 dark:border-slate-800 text-2xl md:text-4xl lg:text-5xl text-slate-900 dark:text-white pb-3 md:pb-4 focus:outline-none placeholder-slate-400 dark:placeholder-slate-700 font-medium transition-all duration-300 leading-tight" 
-                        placeholder="e.g., Master Python Decorators">
-                    <div class="absolute bottom-0 left-0 h-[3px] bg-gradient-to-r from-brand-yellow to-brand-orange w-0 group-focus-within:w-full transition-all duration-500 ease-out"></div>
+        <div class="glass-card flex flex-col md:flex-row justify-between items-start md:items-center mb-10 p-5 md:p-6 rounded-3xl shadow-lg dark:shadow-none animate-fade-in-up gap-5 md:gap-0">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-yellow via-brand-orange to-brand-red flex items-center justify-center text-white text-xl font-bold shadow-lg">N</div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight tracking-tight">Notschool</h1>
+                    <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-semibold tracking-wider uppercase mt-0.5">Ditch the Classroom</p>
                 </div>
             </div>
-
-            <div class="flex flex-col md:flex-row gap-5 md:gap-8 items-end animate-fade-in-up delay-200">
-                
-                <div class="w-full md:flex-1">
-                    <label class="block text-[10px] md:text-sm font-bold text-slate-500 mb-2 md:mb-3 tracking-[0.2em] uppercase ml-1">Context Material <span class="lowercase font-medium opacity-70">(Optional)</span></label>
-                    <div class="relative group cursor-pointer h-[60px] md:h-[64px]">
-                        <div class="absolute inset-0 bg-white/50 dark:bg-white/[0.03] backdrop-blur-md rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 group-hover:border-brand-orange transition-colors duration-300"></div>
-                        <input type="file" id="image" accept="image/*" 
-                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" title="Choose a file">
-                        <div class="absolute inset-0 z-10 flex items-center px-4 md:px-5 text-slate-600 dark:text-slate-400 font-medium">
-                            <span class="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm mr-3 shadow-sm group-hover:bg-brand-orange group-hover:text-white transition-colors whitespace-nowrap">Choose File</span>
-                            <span class="truncate text-xs md:text-sm max-w-[140px] md:max-w-[200px]" id="fileNameDisplay">Upload syllabus or Diagram</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="w-full md:w-auto">
-                    <button type="submit" id="submitBtn" 
-                        class="w-full h-[60px] md:h-[64px] px-6 md:px-10 relative group overflow-hidden bg-slate-900 dark:bg-white/5 backdrop-blur-md text-white font-bold rounded-2xl transition-all duration-300 border border-transparent dark:border-white/10 hover:border-brand-orange hover:shadow-[0_0_30px_rgba(249,115,22,0.2)] flex justify-center items-center gap-3 text-base md:text-lg z-20 transform hover:-translate-y-1">
-                        <div class="absolute inset-0 bg-gradient-to-r from-brand-yellow via-brand-orange to-brand-red opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
-                        <span class="relative z-10 whitespace-nowrap">Deploy Agents</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 relative z-10 text-brand-yellow group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
+            <div class="flex items-center gap-3 flex-wrap w-full md:w-auto justify-start md:justify-end">
+                <button id="reset-btn" class="hidden bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl hover:border-brand-orange hover:text-brand-orange transition-all font-bold text-xs md:text-sm shadow-sm">
+                    🔄 Reset
+                </button>
+                <button id="reschedule-btn" class="hidden bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 px-4 py-2 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/40 transition-all font-bold text-xs md:text-sm shadow-sm">
+                    ⚡ Auto-Fix
+                </button>
+                <div id="auth-status-wrap" class="flex items-center gap-3">
+                    <span id="auth-status" class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-full tracking-wider uppercase">Unlinked</span>
+                    <button id="auth-btn" class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl hover:border-brand-orange hover:text-brand-orange transition-all font-bold text-xs md:text-sm flex items-center gap-2 shadow-sm">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/></svg>
+                        Connect
                     </button>
                 </div>
             </div>
-        </form>
-
-        <div id="loader" class="hidden mt-12 animate-fade-in-up">
-            <div class="flex items-center space-x-4 bg-white/60 dark:bg-black/40 backdrop-blur-xl w-fit px-5 py-3 rounded-full border border-slate-200 dark:border-slate-800 mx-auto md:mx-0">
-                <div class="relative w-5 h-5 md:w-6 md:h-6">
-                    <div class="absolute inset-0 rounded-full border-t-2 border-brand-orange animate-spin"></div>
-                    <div class="absolute inset-1 rounded-full border-b-2 border-brand-yellow animate-spin" style="animation-direction: reverse;"></div>
-                </div>
-                <p id="loaderText" class="text-slate-700 dark:text-slate-300 font-bold tracking-widest uppercase text-[10px] md:text-xs animate-pulse">Initializing Node...</p>
-            </div>
         </div>
 
-        <div id="errorState" class="hidden mt-10 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 p-5 rounded-2xl animate-fade-in-up shadow-lg">
-            <div class="flex items-start gap-4">
-                <div class="bg-red-100 dark:bg-red-500/20 p-2 rounded-full flex-shrink-0">
-                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-1 text-base md:text-lg">Deployment Failed</h4>
-                    <span id="errorMessage" class="text-xs md:text-sm font-medium opacity-90 leading-relaxed block"></span>
-                </div>
-            </div>
+        <div class="flex mb-8 border-b border-slate-200 dark:border-slate-800 gap-8 animate-fade-in-up delay-100">
+            <button id="tab-learning" onclick="switchTab('learning')" class="pb-4 font-bold text-brand-orange border-b-2 border-brand-orange transition text-base md:text-lg flex items-center gap-2">
+                📚 Learning Mode
+            </button>
+            <button id="tab-interview" onclick="switchTab('interview')" class="pb-4 font-semibold text-slate-500 hover:text-brand-yellow transition text-base md:text-lg flex items-center gap-2">
+                💼 Interview Prep
+            </button>
         </div>
 
-        <div id="results" class="hidden mt-16 md:mt-24 pt-12 md:pt-16 border-t border-slate-200 dark:border-slate-800">
-            
-            <div class="flex flex-col items-start justify-between mb-10 md:mb-16 gap-5 animate-fade-in-up md:flex-row md:items-center">
-                <h2 class="text-2xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight" id="courseTitle"></h2>
-                <span id="calendarStatus" class="px-4 py-2 bg-white dark:bg-slate-900 text-xs md:text-sm font-bold rounded-full border border-slate-200 dark:border-slate-800 shadow-sm whitespace-nowrap flex items-center gap-2"></span>
-            </div>
-            
-            <div class="grid lg:grid-cols-12 gap-10 lg:gap-16">
+        <div class="glass-card p-6 md:p-10 rounded-3xl shadow-xl dark:shadow-none mb-10 animate-fade-in-up delay-200">
+            <h2 id="form-title" class="text-[10px] md:text-sm font-bold text-slate-500 mb-6 tracking-[0.2em] uppercase ml-1">What do you want to master today?</h2>
+            <form id="notschool-form" class="space-y-8 md:space-y-10">
                 
-                <div class="lg:col-span-7 animate-fade-in-up delay-100">
-                    <h3 class="text-[10px] md:text-xs font-bold mb-6 md:mb-8 text-slate-500 tracking-[0.2em] uppercase flex items-center gap-3 md:gap-4">
-                        <span class="w-6 md:w-8 h-[2px] bg-brand-orange"></span> Curriculum Breakdown
-                    </h3>
-                    <div id="modulesList" class="space-y-0 relative before:absolute before:inset-y-0 before:left-[11px] md:before:left-[15px] before:w-[2px] before:bg-slate-200 dark:before:bg-slate-800 ml-1 md:ml-0">
-                        </div>
+                <div class="relative group">
+                    <input type="text" id="goal" required maxlength="200"
+                        placeholder="e.g., Learn Next.js and Tailwind from scratch..."
+                        class="w-full bg-transparent border-b-2 border-slate-300 dark:border-slate-800 text-xl md:text-3xl text-slate-900 dark:text-white pb-3 md:pb-4 focus:outline-none placeholder-slate-400 dark:placeholder-slate-700 font-medium transition-all duration-300 pr-16">
+                    <div class="absolute bottom-0 left-0 h-[3px] bg-gradient-to-r from-brand-yellow to-brand-orange w-0 group-focus-within:w-full transition-all duration-500 ease-out"></div>
+                    <span id="char-count" class="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] md:text-xs text-slate-400 font-mono tracking-widest pointer-events-none">0/200</span>
                 </div>
 
-                <div class="lg:col-span-5 animate-fade-in-up delay-200">
-                    <div class="sticky top-6 md:top-12 bg-white/70 dark:bg-white/[0.02] backdrop-blur-xl rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-none">
-                        <h3 class="text-[10px] md:text-xs font-bold mb-6 md:mb-8 text-slate-500 tracking-[0.2em] uppercase flex items-center gap-2 md:gap-3">
-                            <svg class="w-4 h-4 md:w-5 md:h-5 text-brand-red" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-                            Curated Media
-                        </h3>
-                        <ul id="youtubeList" class="space-y-3 md:space-y-4">
-                            </ul>
+                <div id="drop-zone" class="relative group cursor-pointer border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-brand-orange transition-colors duration-300 rounded-3xl p-8 md:p-10 text-center bg-white/30 dark:bg-white/[0.02]">
+                    <svg class="mx-auto h-10 w-10 md:h-12 md:w-12 text-slate-400 group-hover:text-brand-orange transition-colors mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p class="font-bold text-slate-700 dark:text-slate-300 text-sm md:text-base">Drop a Syllabus or Job Description image</p>
+                    <p class="text-xs md:text-sm mt-2 text-slate-500">PNG, JPG, WebP — or click to browse</p>
+                    <input type="file" id="file-upload" class="hidden" accept="image/*">
+                    <div id="file-preview" class="hidden mt-5 inline-flex items-center gap-3 bg-brand-orange/10 text-brand-orange px-4 py-2 rounded-xl text-sm font-bold border border-brand-orange/20 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span id="file-name" class="max-w-[150px] md:max-w-[200px] truncate">No file</span>
+                        <button type="button" id="clear-file" class="ml-1 hover:text-red-500 transition-colors">✕</button>
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full h-[60px] md:h-[64px] relative group overflow-hidden bg-slate-900 dark:bg-white/5 backdrop-blur-md text-white font-bold rounded-2xl transition-all duration-300 border border-transparent dark:border-white/10 hover:border-brand-orange hover:shadow-[0_0_30px_rgba(249,115,22,0.3)] flex justify-center items-center gap-3 text-base md:text-lg z-20 transform hover:-translate-y-1">
+                    <div class="absolute inset-0 bg-gradient-to-r from-brand-yellow via-brand-orange to-brand-red opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                    <span class="relative z-10">Deploy Agents</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 relative z-10 text-brand-yellow group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+
+        <div id="loading" class="hidden glass-card p-8 rounded-3xl shadow-xl dark:shadow-none mb-10 animate-fade-in-up">
+            <div class="text-center mb-10">
+                <div class="flex items-center justify-center space-x-4 mb-6">
+                    <div class="relative w-8 h-8 md:w-10 md:h-10">
+                        <div class="absolute inset-0 rounded-full border-t-2 border-brand-orange animate-spin"></div>
+                        <div class="absolute inset-1.5 rounded-full border-b-2 border-brand-yellow animate-spin" style="animation-direction: reverse;"></div>
+                    </div>
+                </div>
+                <h3 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Nodes Initializing...</h3>
+                <p class="text-xs md:text-sm text-slate-500 font-bold tracking-[0.2em] uppercase mt-3">Synthesizing Curriculum</p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div class="agent-card bg-slate-100 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 text-center transition-all duration-500">
+                    <div class="text-3xl mb-3 opacity-80">🏛️</div>
+                    <div class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 tracking-wider uppercase">Architect</div>
+                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1">Designing path</div>
+                </div>
+                <div class="agent-card bg-slate-100 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 text-center transition-all duration-500">
+                    <div class="text-3xl mb-3 opacity-80">📚</div>
+                    <div class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 tracking-wider uppercase">Librarian</div>
+                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1">Curating media</div>
+                </div>
+                <div class="agent-card bg-slate-100 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 text-center transition-all duration-500">
+                    <div class="text-3xl mb-3 opacity-80">📅</div>
+                    <div class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 tracking-wider uppercase">Scheduler</div>
+                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1">Calendar sync</div>
+                </div>
+                <div class="agent-card bg-slate-100 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 text-center transition-all duration-500">
+                    <div class="text-3xl mb-3 opacity-80">🗄️</div>
+                    <div class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 tracking-wider uppercase">Memory</div>
+                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1">Saving state</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="error-banner" class="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400 p-5 rounded-2xl mb-8 flex items-start gap-4 shadow-lg animate-fade-in-up">
+            <div class="bg-red-100 dark:bg-red-500/20 p-2 rounded-full flex-shrink-0 mt-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div class="flex-1">
+                <div class="font-bold text-base md:text-lg mb-1">Deployment Failed</div>
+                <div id="error-msg" class="text-xs md:text-sm font-medium opacity-90 leading-relaxed"></div>
+            </div>
+            <button onclick="document.getElementById('error-banner').classList.add('hidden')" class="text-red-400 hover:text-red-600 font-bold p-1">✕</button>
+        </div>
+
+        <div id="results" class="hidden space-y-8 fade-in pb-12">
+
+            <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl dark:shadow-none">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-5">
+                    <div>
+                        <h3 class="text-2xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight" id="plan-title">Your Learning Roadmap</h3>
+                        <p class="text-[10px] md:text-xs font-bold text-slate-500 tracking-[0.2em] uppercase mt-2">AI Generated Pathway</p>
+                    </div>
+                    <div id="calendar-container" class="hidden bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-500/30 font-bold text-xs md:text-sm flex items-center gap-3 shadow-sm">
+                        <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span></span>
+                        <a id="calendar-link" href="#" target="_blank" class="hover:underline">View Calendar Event</a>
+                    </div>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 overflow-x-auto border border-slate-200 dark:border-slate-800 flex justify-center min-h-[160px] items-center">
+                    <div id="mermaid-output"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-8 glass-card p-6 md:p-8 rounded-3xl shadow-xl dark:shadow-none">
+                    <h3 class="text-[10px] md:text-xs font-bold mb-6 text-slate-500 tracking-[0.2em] uppercase flex items-center gap-3">
+                        <svg class="w-4 h-4 md:w-5 md:h-5 text-brand-red" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                        Curated Media
+                    </h3>
+                    <ul id="youtube-output" class="space-y-4"></ul>
+                </div>
+
+                <div class="lg:col-span-4 space-y-6 md:space-y-8">
+                    <div id="trends-container" class="hidden glass-card p-6 md:p-8 rounded-3xl shadow-xl dark:shadow-none">
+                        <h3 class="text-[10px] md:text-xs font-bold mb-5 text-brand-orange tracking-[0.2em] uppercase flex items-center gap-2">🔥 Industry Trends</h3>
+                        <div id="trends-output" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div id="certs-container" class="hidden glass-card p-6 md:p-8 rounded-3xl shadow-xl dark:shadow-none">
+                        <h3 class="text-[10px] md:text-xs font-bold mb-5 text-brand-yellow tracking-[0.2em] uppercase flex items-center gap-2">🏆 Top Certifications</h3>
+                        <div id="certs-output" class="flex flex-col gap-3"></div>
                     </div>
                 </div>
             </div>
+
+            <div id="modules-container" class="hidden glass-card p-6 md:p-8 rounded-3xl shadow-xl dark:shadow-none">
+                <h3 class="text-[10px] md:text-xs font-bold mb-6 text-slate-500 tracking-[0.2em] uppercase flex items-center gap-3">
+                    <span class="w-6 md:w-8 h-[2px] bg-brand-orange"></span> Curriculum Breakdown
+                </h3>
+                <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 dark:bg-slate-900/80 text-xs text-slate-500 uppercase tracking-wider font-bold">
+                            <tr>
+                                <th class="px-6 py-4 rounded-tl-2xl">Day</th>
+                                <th class="px-6 py-4">Topic</th>
+                                <th class="px-6 py-4">Description</th>
+                                <th class="px-6 py-4 text-right rounded-tr-2xl">Hours</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modules-output" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody>
+                    </table>
+                </div>
+            </div>
+            
         </div>
     </div>
 
@@ -223,143 +335,363 @@
             }
         });
 
-        // --- Custom File Input Display ---
-        document.getElementById('image').addEventListener('change', function(e) {
-            const fileName = e.target.files[0] ? e.target.files[0].name : 'Upload syllabus or Diagram';
-            document.getElementById('fileNameDisplay').textContent = fileName;
+        // --- Core Application State ---
+        let currentMode = 'learning';
+        let userAccessToken = null;
+        let tokenClient;
+        let selectedFile = null;
+
+        // --- Agent Animation Logic ---
+        let agentTimer = null;
+
+        function startAgentAnimation() {
+            const cards = document.querySelectorAll('.agent-card');
+            let step = 0;
+            agentTimer = setInterval(() => {
+                cards.forEach((c, i) => {
+                    // Reset
+                    c.classList.remove('agent-active', 'border-brand-orange', 'bg-brand-orange/5', 'opacity-50', 'dark:bg-emerald-900/20', 'border-emerald-500/30', 'dark:text-emerald-400');
+                    const title = c.querySelector('.font-bold');
+                    title.classList.remove('text-emerald-600', 'dark:text-emerald-400', 'text-brand-orange');
+                    
+                    if (i < step) {
+                        // Completed
+                        c.classList.add('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-200', 'dark:border-emerald-500/30');
+                        title.classList.add('text-emerald-600', 'dark:text-emerald-400');
+                    } else if (i === step) {
+                        // Active
+                        c.classList.add('agent-active', 'bg-brand-orange/5', 'border-brand-orange');
+                        title.classList.add('text-brand-orange');
+                    } else {
+                        // Pending
+                        c.classList.add('bg-slate-100', 'dark:bg-slate-800/50', 'border-slate-200', 'dark:border-slate-700/50', 'opacity-50');
+                    }
+                });
+                step = (step + 1) % (cards.length + 1);
+            }, 1800);
+        }
+
+        function stopAgentAnimation() {
+            if (agentTimer) { clearInterval(agentTimer); agentTimer = null; }
+            const cards = document.querySelectorAll('.agent-card');
+            cards.forEach(c => {
+                c.classList.remove('agent-active', 'opacity-50', 'border-brand-orange', 'bg-brand-orange/5', 'bg-slate-100', 'dark:bg-slate-800/50', 'border-slate-200', 'dark:border-slate-700/50');
+                c.classList.add('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-200', 'dark:border-emerald-500/30');
+                const title = c.querySelector('.font-bold');
+                title.classList.remove('text-brand-orange');
+                title.classList.add('text-emerald-600', 'dark:text-emerald-400');
+            });
+        }
+
+        function showError(msg) {
+            document.getElementById('error-msg').textContent = msg;
+            document.getElementById('error-banner').classList.remove('hidden');
+        }
+
+        // --- Drag and Drop Logic ---
+        const dropZone = document.getElementById('drop-zone');
+        const fileUpload = document.getElementById('file-upload');
+
+        dropZone.addEventListener('click', (e) => {
+            if (e.target.id !== 'clear-file') fileUpload.click();
+        });
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-active'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-active'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault(); dropZone.classList.remove('drag-active');
+            if (e.dataTransfer.files.length > 0) setFile(e.dataTransfer.files[0]);
+        });
+        fileUpload.addEventListener('change', (e) => { if (e.target.files.length > 0) setFile(e.target.files[0]); });
+
+        function setFile(file) {
+            selectedFile = file;
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('file-preview').classList.remove('hidden');
+        }
+
+        document.getElementById('clear-file').addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectedFile = null;
+            fileUpload.value = '';
+            document.getElementById('file-preview').classList.add('hidden');
         });
 
-        // --- Core API Logic ---
-        document.getElementById('orchestratorForm').addEventListener('submit', async (e) => {
+        // --- Character Counter ---
+        document.getElementById('goal').addEventListener('input', (e) => {
+            document.getElementById('char-count').textContent = `${e.target.value.length}/200`;
+        });
+
+        // --- Google OAuth Integration ---
+        window.onload = function () {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: '583271943826-l2go9nbmei40at92uohkt3en2iif9c81.apps.googleusercontent.com',
+                scope: 'https://www.googleapis.com/auth/calendar.events',
+                callback: (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        userAccessToken = tokenResponse.access_token;
+                        document.getElementById('auth-status').innerHTML = '✅ Linked';
+                        document.getElementById('auth-status').className = 'text-[10px] md:text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/30 px-3 py-1.5 rounded-full tracking-wider uppercase';
+                        document.getElementById('auth-btn').style.display = 'none';
+                        document.getElementById('reschedule-btn').classList.remove('hidden');
+                        document.getElementById('reset-btn').classList.remove('hidden');
+                    }
+                },
+            });
+
+            // Reschedule
+            document.getElementById('reschedule-btn').addEventListener('click', async () => {
+                if (!userAccessToken) return alert("Please link your calendar first.");
+                const btn = document.getElementById('reschedule-btn');
+                const original = btn.innerText;
+                btn.innerText = "⏳ Scanning...";
+                btn.disabled = true;
+                const formData = new FormData();
+                formData.append('access_token', userAccessToken);
+                try {
+                    const res = await fetch('/api/reschedule', { method: 'POST', body: formData });
+                    const result = await res.json();
+                    alert("✅ " + result.message);
+                } catch (err) {
+                    alert("Failed to reach backend.");
+                } finally {
+                    btn.innerText = original;
+                    btn.disabled = false;
+                }
+            });
+
+            // Reset
+            document.getElementById('reset-btn').addEventListener('click', async () => {
+                if (!confirm("Clear the database for a fresh demo?")) return;
+                const btn = document.getElementById('reset-btn');
+                btn.innerText = "🧹 Clearing...";
+                btn.disabled = true;
+                try {
+                    const res = await fetch('/api/reset', { method: 'POST' });
+                    const result = await res.json();
+                    document.getElementById('results').classList.add('hidden');
+                    document.getElementById('goal').value = '';
+                    document.getElementById('char-count').textContent = '0/200';
+                    selectedFile = null;
+                    fileUpload.value = '';
+                    document.getElementById('file-preview').classList.add('hidden');
+                    alert("✅ " + result.message);
+                } catch (err) {
+                    alert("Failed to reset.");
+                } finally {
+                    btn.innerText = "🔄 Reset";
+                    btn.disabled = false;
+                }
+            });
+        };
+
+        document.getElementById('auth-btn').onclick = () => tokenClient.requestAccessToken({ prompt: 'consent' });
+
+        // --- Tab Management ---
+        function switchTab(mode) {
+            currentMode = mode;
+            const tl = document.getElementById('tab-learning');
+            const ti = document.getElementById('tab-interview');
+            
+            const active = "pb-4 font-bold text-brand-orange border-b-2 border-brand-orange transition text-base md:text-lg flex items-center gap-2";
+            const inactive = "pb-4 font-semibold text-slate-500 hover:text-brand-yellow transition text-base md:text-lg flex items-center gap-2";
+            
+            if (mode === 'learning') {
+                tl.className = active; ti.className = inactive;
+                document.getElementById('form-title').innerText = "What do you want to master today?";
+                document.getElementById('goal').placeholder = "e.g., Learn Next.js and Tailwind from scratch...";
+            } else {
+                ti.className = active; tl.className = inactive;
+                document.getElementById('form-title').innerText = "What role are you prepping for?";
+                document.getElementById('goal').placeholder = "e.g., Senior Full Stack Developer Interview...";
+            }
+        }
+
+        // --- Form Submission & API Generation ---
+        document.getElementById('notschool-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const submitBtn = document.getElementById('submitBtn');
-            const loader = document.getElementById('loader');
-            const results = document.getElementById('results');
-            const errorState = document.getElementById('errorState');
-            
-            // Button loading state
+
+            const goal = document.getElementById('goal').value.trim();
+            if (!goal) return;
+
+            // Reset UI
+            document.getElementById('error-banner').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+
+            const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
-            const originalBtnContent = submitBtn.innerHTML;
             submitBtn.innerHTML = `
                 <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span class="text-white whitespace-nowrap">Connecting...</span>
+                <span class="text-white whitespace-nowrap font-bold">Connecting...</span>
             `;
             submitBtn.classList.add('cursor-not-allowed', 'opacity-90');
-            
-            loader.classList.remove('hidden');
-            results.classList.add('hidden');
-            errorState.classList.add('hidden');
+
+            startAgentAnimation();
 
             const formData = new FormData();
-            formData.append('goal', document.getElementById('goal').value);
-            
-            const fileInput = document.getElementById('image');
-            if(fileInput.files && fileInput.files.length > 0) {
-                formData.append('image', fileInput.files[0]);
-            }
-
-            // Dynamic Loader Text Interval
-            const loaderText = document.getElementById('loaderText');
-            const agentStatuses = [
-                "Architect analyzing...", 
-                "Librarian querying...", 
-                "Scheduler calculating...",
-                "Syncing final state..."
-            ];
-            let statusIndex = 0;
-            const statusInterval = setInterval(() => {
-                statusIndex = (statusIndex + 1) % agentStatuses.length;
-                if(loaderText) loaderText.textContent = agentStatuses[statusIndex];
-            }, 1800);
+            formData.append('goal', goal);
+            formData.append('mode', currentMode);
+            if (userAccessToken) formData.append('access_token', userAccessToken);
+            if (selectedFile) formData.append('image', selectedFile);
 
             try {
-                // API Call
-                const response = await fetch('/api/generate', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const jsonResponse = await response.json();
-                
-                if(jsonResponse.status === 'success') {
-                    const data = jsonResponse.data;
-                    
-                    // 1. Set Title
-                    document.getElementById('courseTitle').textContent = data.curriculum_json.title;
-                    
-                    // 2. Render Timeline Modules
-                    const modulesDiv = document.getElementById('modulesList');
-                    modulesDiv.innerHTML = '';
-                    data.curriculum_json.modules.forEach((mod, index) => {
-                        modulesDiv.innerHTML += `
-                            <div class="relative pl-8 md:pl-12 py-4 md:py-6 group">
-                                <div class="absolute left-0 top-6 md:top-8 w-6 h-6 md:w-8 md:h-8 rounded-full bg-white dark:bg-slate-900 border-4 border-slate-200 dark:border-slate-700 group-hover:border-brand-orange transition-colors duration-300 z-10 -ml-[2px] md:-ml-[1px]"></div>
-                                
-                                <div class="bg-white dark:bg-slate-900/50 p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 group-hover:shadow-lg group-hover:border-brand-orange/30 transition-all duration-300 transform group-hover:-translate-y-1">
-                                    <div class="text-[10px] md:text-xs text-brand-orange font-bold uppercase tracking-[0.1em] mb-2">Phase 0${index + 1}</div>
-                                    <div class="text-slate-700 dark:text-slate-300 text-sm md:text-base lg:text-lg leading-relaxed font-medium">${mod}</div>
-                                </div>
-                            </div>`;
-                    });
+                const response = await fetch('/api/generate', { method: 'POST', body: formData });
 
-                    // 3. Render YouTube Links
-                    const ytList = document.getElementById('youtubeList');
-                    ytList.innerHTML = '';
-                    if (data.youtube_urls && data.youtube_urls.length > 0) {
-                        data.youtube_urls.forEach((url, index) => {
-                            ytList.innerHTML += `
-                                <li class="group">
-                                    <a href="${url}" target="_blank" class="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-800 hover:border-brand-orange/50 transition-all duration-300 shadow-sm hover:shadow-md">
-                                        <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-200 dark:bg-slate-950 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold group-hover:bg-brand-orange group-hover:text-white transition-colors text-xs md:text-sm">
-                                            <svg class="w-4 h-4 md:w-5 md:h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <div class="text-slate-900 dark:text-white font-bold text-xs md:text-sm truncate group-hover:text-brand-orange transition-colors">Watch Session ${index + 1}</div>
-                                            <div class="text-slate-500 text-[10px] md:text-xs mt-0.5 md:mt-1 truncate">External Video Resource</div>
-                                        </div>
-                                    </a>
-                                </li>`;
-                        });
-                    } else {
-                        ytList.innerHTML = '<li class="text-slate-500 text-xs md:text-sm italic p-4 text-center">No precise video matches found.</li>';
-                    }
-
-                    // 4. Calendar Status
-                    const calStatus = document.getElementById('calendarStatus');
-                    if (data.calendar_event_id) {
-                        calStatus.innerHTML = `<span class="relative flex h-2.5 w-2.5 md:h-3 md:w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 md:h-3 md:w-3 bg-emerald-500"></span></span> <span class="text-emerald-700 dark:text-emerald-400">Synced to Calendar</span>`;
-                    } else {
-                        calStatus.innerHTML = `<span class="relative flex h-2.5 w-2.5 md:h-3 md:w-3"><span class="relative inline-flex rounded-full h-2.5 w-2.5 md:h-3 md:w-3 bg-brand-yellow"></span></span> <span class="text-amber-700 dark:text-amber-400">Manual Scheduling Required</span>`;
-                    }
-
-                    // Show results & scroll smoothly
-                    results.classList.remove('hidden');
-                    setTimeout(() => {
-                        results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-
-                } else {
-                    throw new Error(jsonResponse.detail || "API Orchestration Error");
+                if (!response.ok) {
+                    let errDetail = `Server error ${response.status}`;
+                    try { const errJson = await response.json(); errDetail = errJson.detail || errDetail; } catch {}
+                    throw new Error(errDetail);
                 }
+
+                const result = await response.json();
+                const data = result.data;
+                const curr = data.curriculum_json;
+
+                stopAgentAnimation();
+                renderResults(data, curr);
+
             } catch (error) {
-                document.getElementById('errorMessage').textContent = error.message === "Failed to fetch" 
-                    ? "Network offline or backend orchestrator unreachable." 
-                    : error.message;
-                errorState.classList.remove('hidden');
+                showError(error.message || 'Failed to generate curriculum. Check your API keys and backend connection.');
+                console.error(error);
             } finally {
-                clearInterval(statusInterval);
-                loader.classList.add('hidden');
-                
-                // Reset button
+                document.getElementById('loading').classList.add('hidden');
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnContent;
                 submitBtn.classList.remove('cursor-not-allowed', 'opacity-90');
+                submitBtn.innerHTML = `
+                    <div class="absolute inset-0 bg-gradient-to-r from-brand-yellow via-brand-orange to-brand-red opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                    <span class="relative z-10 whitespace-nowrap">Deploy Agents</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 relative z-10 text-brand-yellow group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                `;
+                stopAgentAnimation();
             }
         });
+
+        // --- Render Results to Screen ---
+        async function renderResults(data, curr) {
+            // Title
+            if (curr && curr.title) {
+                document.getElementById('plan-title').innerText = curr.title;
+            }
+
+            // 1. Mermaid Graph (Mermaid v10+ API)
+            let mermaidDef = "graph TD;\n";
+            if (curr && curr.modules && curr.modules.length > 0) {
+                let prev = null;
+                curr.modules.forEach((mod, i) => {
+                    const id = `N${i}`;
+                    const safe = (mod.topic || 'Module').replace(/[^a-zA-Z0-9 \-]/g, "").trim();
+                    const hrs = mod.duration_hours || 1;
+                    mermaidDef += `  ${id}["📅 Day ${mod.day || i + 1}: ${safe}\n⏱ ${hrs}h"];\n`;
+                    if (prev) mermaidDef += `  ${prev} --> ${id};\n`;
+                    prev = id;
+                });
+            } else {
+                mermaidDef += "  Start[\"🚀 Start\"] --> End[\"🎯 Finish\"];\n";
+            }
+
+            const mermaidContainer = document.getElementById('mermaid-output');
+            mermaidContainer.innerHTML = '';
+            try {
+                const uniqueId = 'mg-' + Date.now();
+                const { svg } = await mermaid.render(uniqueId, mermaidDef);
+                mermaidContainer.innerHTML = svg;
+            } catch (err) {
+                console.error("Mermaid render error:", err);
+                mermaidContainer.innerHTML = `<p class="text-slate-500 text-sm">Graph rendering unavailable</p>`;
+            }
+
+            // 2. YouTube Videos
+            const ytList = document.getElementById('youtube-output');
+            ytList.innerHTML = '';
+            if (data.youtube_urls && data.youtube_urls.length > 0) {
+                data.youtube_urls.forEach((url, i) => {
+                    const videoId = url.split('v=')[1] || '';
+                    const thumb = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
+                    ytList.innerHTML += `
+                    <li class="group cursor-pointer" onclick="window.open('${url}','_blank')">
+                        <a class="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-800 hover:border-brand-orange/50 transition-all duration-300 shadow-sm hover:shadow-md">
+                            ${thumb ? 
+                                `<img src="${thumb}" class="w-24 h-16 object-cover rounded-xl flex-shrink-0 bg-slate-200 dark:bg-slate-800" onerror="this.style.display='none'">` : 
+                                `<div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-200 dark:bg-slate-950 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold group-hover:bg-brand-orange group-hover:text-white transition-colors text-xs md:text-sm"><svg class="w-4 h-4 md:w-5 md:h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`
+                            }
+                            <div class="flex-1 min-w-0">
+                                <div class="text-slate-900 dark:text-white font-bold text-xs md:text-sm truncate group-hover:text-brand-orange transition-colors">Video Resource ${i+1}</div>
+                                <div class="text-slate-500 text-[10px] md:text-xs mt-0.5 md:mt-1 truncate">${url}</div>
+                            </div>
+                        </a>
+                    </li>`;
+                });
+            } else {
+                ytList.innerHTML = '<li class="text-slate-500 text-xs md:text-sm italic p-4 text-center border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl">No precise video matches found.</li>';
+            }
+
+            // 3. Trends
+            const trendsContainer = document.getElementById('trends-container');
+            const trendsList = document.getElementById('trends-output');
+            trendsList.innerHTML = '';
+            let allTrends = [];
+            if (data.web_trends) allTrends = allTrends.concat(data.web_trends);
+            if (curr && curr.trends) allTrends = allTrends.concat(curr.trends);
+            if (allTrends.length > 0) {
+                trendsContainer.classList.remove('hidden');
+                [...new Set(allTrends)].slice(0, 10).forEach(t => {
+                    trendsList.innerHTML += `<span class="bg-brand-orange/10 text-brand-orange border border-brand-orange/20 px-3 py-1.5 rounded-xl text-xs font-bold">${t}</span>`;
+                });
+            } else { trendsContainer.classList.add('hidden'); }
+
+            // 4. Certifications
+            const certsContainer = document.getElementById('certs-container');
+            const certsList = document.getElementById('certs-output');
+            certsList.innerHTML = '';
+            if (curr && curr.certifications && curr.certifications.length > 0) {
+                certsContainer.classList.remove('hidden');
+                curr.certifications.forEach(c => {
+                    certsList.innerHTML += `
+                    <div class="flex items-center gap-3 bg-brand-yellow/10 border border-brand-yellow/20 text-yellow-600 dark:text-brand-yellow px-4 py-3 rounded-xl text-xs md:text-sm font-bold">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        ${c}
+                    </div>`;
+                });
+            } else { certsContainer.classList.add('hidden'); }
+
+            // 5. Module Table
+            const modulesContainer = document.getElementById('modules-container');
+            const modulesOutput = document.getElementById('modules-output');
+            modulesOutput.innerHTML = '';
+            if (curr && curr.modules && curr.modules.length > 0) {
+                modulesContainer.classList.remove('hidden');
+                curr.modules.forEach((mod, i) => {
+                    modulesOutput.innerHTML += `
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td class="px-6 py-4 font-bold text-brand-orange text-center whitespace-nowrap">
+                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-xs">${mod.day || i+1}</span>
+                        </td>
+                        <td class="px-6 py-4 font-bold text-slate-800 dark:text-white text-sm whitespace-nowrap">${mod.topic || '—'}</td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-xs md:text-sm max-w-sm">${mod.description || '—'}</td>
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            <span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-bold border border-slate-200 dark:border-slate-700">${mod.duration_hours || 1}h</span>
+                        </td>
+                    </tr>`;
+                });
+            } else { modulesContainer.classList.add('hidden'); }
+
+            // 6. Calendar Event
+            const calContainer = document.getElementById('calendar-container');
+            if (data.calendar_event_id && data.calendar_event_id !== "No Link") {
+                document.getElementById('calendar-link').href = data.calendar_event_id;
+                calContainer.classList.remove('hidden');
+            } else {
+                calContainer.classList.add('hidden');
+            }
+
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     </script>
 </body>
 </html>

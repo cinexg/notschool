@@ -19,7 +19,7 @@ def search_youtube_videos(queries: List[str], max_results_per_query: int = 1) ->
         try:
             request = youtube.search().list(
                 part="snippet",
-                maxResults=max_results_per_query,
+                maxResults=7,
                 q=query,
                 type="video"
             )

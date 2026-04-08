@@ -19,6 +19,3 @@ def validate_environment():
 
     if missing_keys:
         raise ValueError(f"Missing critical environment variables: {', '.join(missing_keys)}. Please update your .env file.")
-
-# Run validation immediately upon import
-validate_environment()
