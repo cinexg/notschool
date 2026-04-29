@@ -1,27 +1,31 @@
 import operator
 from typing import Annotated, TypedDict, List, Any, Optional
 
+
 class NotschoolState(TypedDict):
-    """
-    The unified state schema for the Notschool OS orchestrator.
-    """
+    """Unified state schema for the Notschool OS orchestrator."""
     # User Inputs
     goal: str
     mode: str  # "learning" or "interview"
     image_bytes: Optional[bytes]
-    image_mime_type: Optional[str]  # Actual MIME type of uploaded image
-    user_access_token: Optional[str]  # For multi-tenant calendar auth
+    image_mime_type: Optional[str]
+    user_access_token: Optional[str]
+    user_id: Optional[str]
 
     # Agent Outputs
     curriculum_json: Optional[dict[str, Any]]
-    youtube_urls: List[str]
-    web_trends: List[str] # NEW: For storing latest interview trends
-    calendar_event_id: Optional[str]
+    youtube_urls: List[str]              # flat list, parallel to curriculum.modules (one per module)
+    web_trends: List[str]
+    industry_opportunities: List[dict]
+    calendar_event_id: Optional[str]     # first event link (for backward compat / hero card)
+    calendar_event_ids: Optional[List[str]]
+    calendar_event_links: Optional[List[str]]   # per-session html links
     db_record_id: Optional[int]
+    curriculum_id: Optional[int]         # newly created curriculum row
 
     # Orchestration & Audit Logging
     messages: Annotated[List[dict[str, str]], operator.add]
-    
+
     # Context
-    user_timezone: str 
+    user_timezone: str
     current_timestamp: str

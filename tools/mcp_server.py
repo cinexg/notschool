@@ -6,7 +6,13 @@ from typing import List
 # Import your existing logic
 from tools.youtube_client import search_youtube_videos
 from tools.calendar_client import create_calendar_event
-from duckduckgo_search import DDGS
+
+# `duckduckgo_search` was renamed to `ddgs` in 2025 — prefer the new module name,
+# fall back to the old name on older installs so neither breaks the import.
+try:
+    from ddgs import DDGS  # type: ignore
+except ImportError:  # pragma: no cover
+    from duckduckgo_search import DDGS  # type: ignore
 
 # Initialize FastMCP
 mcp = FastMCP("Notschool")
@@ -38,6 +44,30 @@ def search_web_for_trends(query: str, num_results: int = 3) -> List[str]:
         return results
     except Exception as e:
         return [f"Search failed: {str(e)}"]
+
+@mcp.tool()
+def search_industry_opportunities(goal: str, num_results: int = 5) -> List[dict]:
+    """
+    Search the web for real-world industry programs, cohorts, bootcamps, hackathons,
+    and certifications matching the user's learning goal.
+    Returns structured results with title, url, and description.
+    """
+    try:
+        query = f"{goal} cohort program bootcamp certification hackathon 2025 2026 apply enroll"
+        with DDGS() as ddgs:
+            raw = ddgs.text(query, max_results=num_results)
+            results = [
+                {
+                    "title": r.get("title", "Opportunity"),
+                    "url": r.get("href", ""),
+                    "description": (r.get("body", "") or "")[:160].strip(),
+                    "source": "live"
+                }
+                for r in raw
+            ]
+        return results
+    except Exception as e:
+        return [{"title": "Search unavailable", "url": "", "description": str(e), "source": "error"}]
 
 if __name__ == "__main__":
     # This allows the server to run via standard input/output (stdio)

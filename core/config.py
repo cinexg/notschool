@@ -9,13 +9,9 @@ def validate_environment():
     Validates that all necessary API keys are present.
     Run this when the application initializes.
     """
-    missing_keys = []
-    
     if not os.getenv("GEMINI_API_KEY"):
-        missing_keys.append("GEMINI_API_KEY")
-        
-    if not os.getenv("YOUTUBE_API_KEY"):
-        missing_keys.append("YOUTUBE_API_KEY")
+        raise ValueError("Missing critical environment variable: GEMINI_API_KEY. Please update your .env file.")
 
-    if missing_keys:
-        raise ValueError(f"Missing critical environment variables: {', '.join(missing_keys)}. Please update your .env file.")
+    if not os.getenv("YOUTUBE_API_KEY"):
+        # Non-fatal: librarian will still run, just without curated videos.
+        print("Warning: YOUTUBE_API_KEY not set — video lookups will be skipped.")

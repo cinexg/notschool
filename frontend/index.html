@@ -3,397 +3,1342 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notschool OS — AI Learning Architect</title>
-    
+    <title>Notschool — AI Learning Architect</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    
+
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    },
                     colors: {
-                        brand: {
-                            bgDark: '#030303',
-                            bgLight: '#F8FAFC',
-                            yellow: '#FACC15',
-                            orange: '#F97316',
-                            red: '#EF4444'
+                        accent: {
+                            DEFAULT: '#F97316',
+                            soft: '#FFEDD5',
+                            ring: 'rgba(249,115,22,0.35)'
+                        },
+                        ink: {
+                            50:  '#FAFAFA',
+                            100: '#F4F4F5',
+                            200: '#E4E4E7',
+                            300: '#D4D4D8',
+                            400: '#A1A1AA',
+                            500: '#71717A',
+                            600: '#52525B',
+                            700: '#3F3F46',
+                            800: '#27272A',
+                            850: '#1B1B1F',
+                            900: '#0F0F11',
+                            950: '#09090B'
                         }
+                    },
+                    boxShadow: {
+                        'soft': '0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.03)',
+                        'lift': '0 8px 24px -8px rgba(0,0,0,0.10), 0 2px 6px -2px rgba(0,0,0,0.06)',
+                        'glow': '0 0 0 1px rgba(249,115,22,0.25), 0 8px 24px -8px rgba(249,115,22,0.35)'
                     },
                     animation: {
-                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                        'blob': 'blob 15s infinite',
+                        'fade-in':    'fadeIn 0.4s cubic-bezier(0.16,1,0.3,1) both',
+                        'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) both',
+                        'slide-up':   'slideUp 0.35s cubic-bezier(0.16,1,0.3,1) both',
+                        'scale-in':   'scaleIn 0.3s cubic-bezier(0.16,1,0.3,1) both',
+                        'shimmer':    'shimmer 2s linear infinite'
                     },
                     keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        blob: {
-                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
-                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
-                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
-                        }
+                        fadeIn:   { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        fadeInUp: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        slideUp:  { '0%': { opacity: '0', transform: 'translateY(16px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        scaleIn:  { '0%': { opacity: '0', transform: 'scale(0.96)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
+                        shimmer:  { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } }
                     }
                 }
             }
         }
     </script>
-    
+
     <script>
-        mermaid.initialize({ 
-            startOnLoad: false, 
-            theme: 'base',
+        mermaid.initialize({
+            startOnLoad: false, theme: 'base',
             themeVariables: {
+                fontFamily: 'Inter, sans-serif',
                 primaryColor: 'transparent',
                 primaryTextColor: '#F97316',
-                primaryBorderColor: '#FACC15',
-                lineColor: '#64748b',
-                secondaryColor: '#1e293b',
-                tertiaryColor: '#0f172a'
+                primaryBorderColor: '#F97316',
+                lineColor: '#71717A',
+                secondaryColor: 'transparent',
+                tertiaryColor: 'transparent'
             }
         });
     </script>
 
     <style>
-        body { transition: background-color 0.5s ease; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        :root {
+            --bg: #FAFAFA;
+            --surface: #FFFFFF;
+            --surface-2: #F4F4F5;
+            --border: rgba(0,0,0,0.07);
+            --border-strong: rgba(0,0,0,0.12);
+            --text: #09090B;
+            --text-muted: #71717A;
+            --text-faint: #A1A1AA;
+        }
+        .dark {
+            --bg: #09090B;
+            --surface: #0F0F11;
+            --surface-2: #18181B;
+            --border: rgba(255,255,255,0.07);
+            --border-strong: rgba(255,255,255,0.13);
+            --text: #FAFAFA;
+            --text-muted: #A1A1AA;
+            --text-faint: #71717A;
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            font-feature-settings: 'cv02','cv03','cv04','cv11';
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg);
+            color: var(--text);
+            transition: background-color 0.4s ease, color 0.3s ease;
+        }
+
+        /* Subtle dot grid background */
+        .bg-dotgrid {
+            background-image: radial-gradient(circle at 1px 1px, var(--border-strong) 1px, transparent 0);
+            background-size: 28px 28px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .dark ::-webkit-scrollbar-thumb { background: #334155; }
-        ::-webkit-scrollbar-thumb:hover { background: #F97316; }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-strong);
+            border-radius: 999px;
+            border: 3px solid var(--bg);
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
 
-        /* Staggered Animations */
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
-        
-        /* Subtle Dot Grid Background */
-        .bg-grid-pattern {
-            background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px);
-            background-size: 24px 24px;
+        /* Card primitives */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
         }
-        .dark .bg-grid-pattern {
-            background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        .card-hover:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px -12px rgba(0,0,0,0.08);
+        }
+        .dark .card-hover:hover { box-shadow: 0 12px 32px -12px rgba(0,0,0,0.5); }
+        .surface-2 { background: var(--surface-2); }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            font-weight: 600; font-size: 0.875rem;
+            padding: 0.625rem 1rem; border-radius: 10px;
+            transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
+            border: 1px solid transparent;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+        .btn:active { transform: translateY(1px); }
+
+        .btn-primary {
+            background: #F97316; color: white;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 6px 16px -6px rgba(249,115,22,0.55);
+        }
+        .btn-primary:hover {
+            background: #EA580C;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 8px 22px -6px rgba(249,115,22,0.65);
+        }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border-color: var(--border-strong);
+        }
+        .btn-secondary:hover { background: var(--surface-2); border-color: var(--text-faint); }
+
+        .btn-ghost {
+            background: transparent; color: var(--text-muted);
+        }
+        .btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+
+        .btn-danger-ghost { color: #EF4444; background: transparent; border: 1px solid var(--border); }
+        .btn-danger-ghost:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); }
+
+        /* Pills / chips */
+        .pill {
+            display: inline-flex; align-items: center; gap: 0.375rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 999px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: var(--surface-2);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .pill-accent {
+            background: rgba(249,115,22,0.1);
+            color: #F97316;
+            border-color: rgba(249,115,22,0.2);
         }
 
-        /* Drag active state */
-        .drag-active { border-color: #F97316 !important; background-color: rgba(249,115,22,0.05) !important; }
+        /* Input underline */
+        .input-bare {
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 100%;
+            color: var(--text);
+        }
+        .input-bare::placeholder { color: var(--text-faint); }
 
-        /* Agent Active Glow */
-        @keyframes agent-glow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.4); border-color: rgba(249,115,22,0.8); }
-            50% { box-shadow: 0 0 0 8px rgba(249,115,22,0); border-color: rgba(249,115,22,0.3); }
+        /* Drop zone */
+        .drop-zone {
+            border: 1px dashed var(--border-strong);
+            border-radius: 14px;
+            background: var(--surface-2);
+            transition: all 0.2s ease;
         }
-        .agent-active { animation: agent-glow 1.5s ease-in-out infinite; }
+        .drop-zone:hover {
+            border-color: #F97316;
+            background: rgba(249,115,22,0.04);
+        }
+        .drag-active { border-color: #F97316 !important; background: rgba(249,115,22,0.06) !important; }
 
-        /* General Utilities */
-        .glass-card {
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.4);
+        /* Tabs */
+        .tab {
+            position: relative;
+            padding: 0.875rem 0;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+            cursor: pointer;
+            background: transparent;
+            border: none;
         }
-        .dark .glass-card {
-            background: rgba(15,23,42,0.6);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.05);
+        .tab:hover { color: var(--text); }
+        .tab.active { color: var(--text); font-weight: 600; }
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; left: 0; right: 0;
+            height: 2px;
+            background: #F97316;
+            border-radius: 2px 2px 0 0;
         }
-        
-        .fade-in { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+        /* Agent step states */
+        .agent-step {
+            position: relative;
+            padding: 1.25rem 1rem;
+            border-radius: 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+            text-align: center;
+        }
+        .agent-active {
+            border-color: #F97316;
+            background: rgba(249,115,22,0.06);
+        }
+        .agent-active::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 13px;
+            border: 1px solid rgba(249,115,22,0.4);
+            animation: pulseRing 1.6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes pulseRing {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.015); }
+        }
+        .agent-done {
+            border-color: rgba(34,197,94,0.3);
+            background: rgba(34,197,94,0.05);
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            border: 2px solid var(--border-strong);
+            border-top-color: #F97316;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Mermaid styling tweaks */
+        #detail-mermaid svg { max-width: 100%; height: auto; }
+        #detail-mermaid .node rect, #detail-mermaid .node polygon {
+            fill: var(--surface) !important;
+            stroke: var(--border-strong) !important;
+            stroke-width: 1px !important;
+        }
+        #detail-mermaid .node:hover rect { stroke: #F97316 !important; }
+        #detail-mermaid .edgePath path { stroke: var(--text-faint) !important; stroke-width: 1.2px !important; }
+        #detail-mermaid .marker { fill: var(--text-faint) !important; stroke: var(--text-faint) !important; }
+        #detail-mermaid .nodeLabel { color: var(--text) !important; font-family: Inter, sans-serif !important; }
+
+        /* Misc */
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .hidden-view { display: none !important; }
+        .nav-btn { transition: color 0.2s; }
+
+        /* Logo mark */
+        .logo-mark {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            background: var(--text);
+            color: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            letter-spacing: -0.02em;
+            position: relative;
+        }
+        .logo-mark::after {
+            content: '';
+            position: absolute;
+            top: 4px; right: 4px;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #F97316;
+        }
+
+        /* Quiz answer states */
+        .quiz-option {
+            display: flex; align-items: flex-start; gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .quiz-option:hover { border-color: var(--border-strong); background: var(--surface-2); }
+        .quiz-option:has(:checked) { border-color: #F97316; background: rgba(249,115,22,0.05); }
+
+        /* Progress bar */
+        .progress-track {
+            height: 4px;
+            border-radius: 999px;
+            background: var(--border);
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #F97316;
+            border-radius: 999px;
+            transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        /* Doubts panel slide */
+        .doubts-panel {
+            transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        /* View transitions */
+        .view { animation: fadeInUp 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+
+        /* Subtle keyboard focus */
+        :focus-visible {
+            outline: 2px solid #F97316;
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+
+        /* Toast */
+        .toast {
+            background: var(--text);
+            color: var(--bg);
+            padding: 0.625rem 1rem;
+            border-radius: 10px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            box-shadow: 0 12px 32px -8px rgba(0,0,0,0.25);
+        }
     </style>
 </head>
-<body class="bg-brand-bgLight text-slate-900 dark:bg-brand-bgDark dark:text-white min-h-screen relative overflow-x-hidden selection:bg-brand-orange selection:text-white pb-16">
+<body class="min-h-screen relative overflow-x-hidden selection:bg-accent selection:text-white pb-20">
 
-    <div class="fixed top-4 right-4 md:top-8 md:right-8 z-50">
-        <button id="themeToggle" class="p-2.5 md:p-3 rounded-full backdrop-blur-xl bg-white/60 dark:bg-black/60 border border-slate-200 dark:border-slate-800 shadow-lg text-slate-600 dark:text-slate-300 hover:text-brand-orange dark:hover:text-brand-yellow transition-all duration-300 hover:scale-110 group">
-            <svg id="sunIcon" class="hidden w-5 h-5 group-hover:rotate-45 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            <svg id="moonIcon" class="w-5 h-5 group-hover:-rotate-12 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+    <!-- Subtle dot grid background -->
+    <div class="fixed inset-0 z-0 bg-dotgrid opacity-50 pointer-events-none"></div>
+    <!-- Soft accent vignette -->
+    <div class="fixed inset-0 z-0 pointer-events-none" style="background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(249,115,22,0.08), transparent 60%);"></div>
+
+    <!-- Theme toggle -->
+    <div class="fixed top-5 right-5 md:top-6 md:right-6 z-50">
+        <button id="themeToggle" aria-label="Toggle theme"
+            class="w-9 h-9 rounded-full card flex items-center justify-center hover:border-[var(--border-strong)] transition">
+            <svg id="sunIcon" class="hidden w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5m0 15V21m9-9h-1.5M4.5 12H3m15.364 6.364l-1.06-1.06M6.696 6.696l-1.06-1.06m12.728 0l-1.06 1.06M6.696 17.304l-1.06 1.06M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <svg id="moonIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
     </div>
 
-    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none transition-colors duration-700 bg-grid-pattern">
-        <div class="absolute top-[-10%] left-[-10%] w-[80vw] h-[80vw] md:w-[40vw] md:h-[40vw] bg-brand-orange/20 dark:bg-brand-orange/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[80px] md:blur-[120px] animate-blob"></div>
-        <div class="absolute top-[20%] right-[-10%] w-[70vw] h-[70vw] md:w-[30vw] md:h-[30vw] bg-brand-yellow/30 dark:bg-brand-yellow/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[80px] md:blur-[100px] animate-blob delay-100"></div>
-        <div class="absolute bottom-[-20%] left-[20%] w-[90vw] h-[90vw] md:w-[50vw] md:h-[50vw] bg-brand-red/10 dark:bg-brand-red/5 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] md:blur-[120px] animate-blob delay-200"></div>
+    <!-- LOGIN OVERLAY -->
+    <div id="login-overlay" class="fixed inset-0 z-40 flex items-center justify-center p-5"
+         style="background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(20px);">
+        <div class="card max-w-md w-full p-10 text-center animate-scale-in" style="border-radius: 20px;">
+            <div class="logo-mark mx-auto mb-6" style="width:44px;height:44px;font-size:18px;border-radius:10px;">N</div>
+            <h1 class="text-2xl font-semibold tracking-tight mb-2">Welcome to Notschool</h1>
+            <p class="text-sm leading-relaxed mb-8" style="color: var(--text-muted)">Your AI learning architect. Generate roadmaps, take quizzes, ask doubts, and track every step.</p>
+            <button id="login-btn" class="btn btn-secondary w-full h-11">
+                <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.61z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Continue with Google
+            </button>
+            <p class="text-[10px] mt-6 tracking-wider uppercase" style="color: var(--text-faint)">We use Google to schedule sessions on your Calendar</p>
+        </div>
     </div>
 
-    <div class="relative z-10 max-w-5xl mx-auto px-5 pt-10 md:pt-16">
-        
-        <div class="glass-card flex flex-col md:flex-row justify-between items-start md:items-center mb-10 p-5 md:p-6 rounded-3xl shadow-lg dark:shadow-none animate-fade-in-up gap-5 md:gap-0">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-yellow via-brand-orange to-brand-red flex items-center justify-center text-white text-xl font-bold shadow-lg">N</div>
+    <!-- TOP BAR -->
+    <header class="relative z-10 max-w-5xl mx-auto px-5 pt-10 md:pt-14">
+        <div class="flex justify-between items-center mb-12">
+            <div class="flex items-center gap-3">
+                <div class="logo-mark">N</div>
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight tracking-tight">Notschool</h1>
-                    <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-semibold tracking-wider uppercase mt-0.5">Ditch the Classroom</p>
+                    <div class="font-semibold text-[15px] tracking-tight leading-none">Notschool</div>
+                    <div class="text-[10px] tracking-[0.18em] uppercase mt-1" style="color: var(--text-faint)">Ditch the classroom</div>
                 </div>
             </div>
-            <div class="flex items-center gap-3 flex-wrap w-full md:w-auto justify-start md:justify-end">
-                <button id="reset-btn" class="hidden bg-white/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl hover:border-brand-orange hover:text-brand-orange transition-all font-bold text-xs md:text-sm shadow-sm">
-                    🔄 Reset
+            <div id="user-chip" class="hidden items-center gap-2 pl-1 pr-1 py-1 rounded-full" style="background: var(--surface); border: 1px solid var(--border);">
+                <img id="user-pic" class="w-6 h-6 rounded-full" alt="" />
+                <span id="user-name" class="text-xs font-medium hidden md:inline pl-1" style="color: var(--text-muted)"></span>
+                <button id="logout-btn" title="Sign out" aria-label="Sign out"
+                        class="w-6 h-6 rounded-full flex items-center justify-center ml-1 transition"
+                        style="color: var(--text-muted); background: transparent;">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                 </button>
-                <button id="reschedule-btn" class="hidden bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 px-4 py-2 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/40 transition-all font-bold text-xs md:text-sm shadow-sm">
-                    ⚡ Auto-Fix
+            </div>
+        </div>
+
+        <!-- NAV -->
+        <nav id="main-nav" class="hidden mb-10" style="border-bottom: 1px solid var(--border)">
+            <div class="flex gap-7 md:gap-9 overflow-x-auto">
+                <button data-view="generate" class="nav-btn tab active whitespace-nowrap">Generate</button>
+                <button data-view="dashboard" class="nav-btn tab whitespace-nowrap">Dashboard</button>
+                <button id="open-doubts-btn" class="tab whitespace-nowrap ml-auto flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    Ask a doubt
                 </button>
-                <div id="auth-status-wrap" class="flex items-center gap-3">
-                    <span id="auth-status" class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-full tracking-wider uppercase">Unlinked</span>
-                    <button id="auth-btn" class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl hover:border-brand-orange hover:text-brand-orange transition-all font-bold text-xs md:text-sm flex items-center gap-2 shadow-sm">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/></svg>
-                        Connect
-                    </button>
-                </div>
             </div>
-        </div>
+        </nav>
 
-        <div class="flex mb-8 border-b border-slate-200 dark:border-slate-800 gap-8 animate-fade-in-up delay-100">
-            <button id="tab-learning" onclick="switchTab('learning')" class="pb-4 font-bold text-brand-orange border-b-2 border-brand-orange transition text-base md:text-lg flex items-center gap-2">
-                📚 Learning Mode
-            </button>
-            <button id="tab-interview" onclick="switchTab('interview')" class="pb-4 font-semibold text-slate-500 hover:text-brand-yellow transition text-base md:text-lg flex items-center gap-2">
-                💼 Interview Prep
-            </button>
-        </div>
-
-        <div class="glass-card p-6 md:p-10 rounded-3xl shadow-xl dark:shadow-none mb-10 animate-fade-in-up delay-200">
-            <h2 id="form-title" class="text-[10px] md:text-sm font-bold text-slate-500 mb-6 tracking-[0.2em] uppercase ml-1">What do you want to master today?</h2>
-            <form id="notschool-form" class="space-y-8 md:space-y-10">
-                
-                <div class="relative group">
-                    <input type="text" id="goal" required maxlength="200"
-                        placeholder="e.g., Learn Next.js and Tailwind from scratch..."
-                        class="w-full bg-transparent border-b-2 border-slate-300 dark:border-slate-800 text-xl md:text-3xl text-slate-900 dark:text-white pb-3 md:pb-4 focus:outline-none placeholder-slate-400 dark:placeholder-slate-700 font-medium transition-all duration-300 pr-16">
-                    <div class="absolute bottom-0 left-0 h-[3px] bg-gradient-to-r from-brand-yellow to-brand-orange w-0 group-focus-within:w-full transition-all duration-500 ease-out"></div>
-                    <span id="char-count" class="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] md:text-xs text-slate-400 font-mono tracking-widest pointer-events-none">0/200</span>
-                </div>
-
-                <div id="drop-zone" class="relative group cursor-pointer border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-brand-orange transition-colors duration-300 rounded-3xl p-8 md:p-10 text-center bg-white/30 dark:bg-white/[0.02]">
-                    <svg class="mx-auto h-10 w-10 md:h-12 md:w-12 text-slate-400 group-hover:text-brand-orange transition-colors mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p class="font-bold text-slate-700 dark:text-slate-300 text-sm md:text-base">Drop a Syllabus or Job Description image</p>
-                    <p class="text-xs md:text-sm mt-2 text-slate-500">PNG, JPG, WebP — or click to browse</p>
-                    <input type="file" id="file-upload" class="hidden" accept="image/*">
-                    <div id="file-preview" class="hidden mt-5 inline-flex items-center gap-3 bg-brand-orange/10 text-brand-orange px-4 py-2 rounded-xl text-sm font-bold border border-brand-orange/20 shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span id="file-name" class="max-w-[150px] md:max-w-[200px] truncate">No file</span>
-                        <button type="button" id="clear-file" class="ml-1 hover:text-red-500 transition-colors">✕</button>
-                    </div>
-                </div>
-
-                <button type="submit" id="submit-btn" class="w-full h-[60px] md:h-[64px] relative group overflow-hidden bg-slate-900 dark:bg-white/5 backdrop-blur-md text-white font-bold rounded-2xl transition-all duration-300 border border-transparent dark:border-white/10 hover:border-brand-orange hover:shadow-[0_0_30px_rgba(249,115,22,0.3)] flex justify-center items-center gap-3 text-base md:text-lg z-20 transform hover:-translate-y-1">
-                    <div class="absolute inset-0 bg-gradient-to-r from-brand-yellow via-brand-orange to-brand-red opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
-                    <span class="relative z-10">Deploy Agents</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 relative z-10 text-brand-yellow group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                </button>
-            </form>
-        </div>
-
-        <div id="loading" class="hidden glass-card p-8 rounded-3xl shadow-xl dark:shadow-none mb-10 animate-fade-in-up">
-            <div class="text-center mb-10">
-                <div class="flex items-center justify-center space-x-4 mb-6">
-                    <div class="relative w-8 h-8 md:w-10 md:h-10">
-                        <div class="absolute inset-0 rounded-full border-t-2 border-brand-orange animate-spin"></div>
-                        <div class="absolute inset-1.5 rounded-full border-b-2 border-brand-yellow animate-spin" style="animation-direction: reverse;"></div>
-                    </div>
-                </div>
-                <h3 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Nodes Initializing...</h3>
-                <p class="text-xs md:text-sm text-slate-500 font-bold tracking-[0.2em] uppercase mt-3">Synthesizing Curriculum</p>
+        <!-- ============ GENERATE VIEW ============ -->
+        <section id="generate-view" class="hidden view">
+            <div class="mb-8">
+                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight mb-2">Generate a roadmap</h2>
+                <p class="text-sm" style="color: var(--text-muted)">Tell us what you want to learn. We'll architect it.</p>
             </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <div class="agent-card bg-slate-100 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 text-center transition-all duration-500">
-                    <div class="text-3xl mb-3 opacity-80">🏛️</div>
-                    <div class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 tracking-wider uppercase">Architect</div>
-                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1">Designing path</div>
-                </div>
-                <div class="agent-card bg-slate-100 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 text-center transition-all duration-500">
-                    <div class="text-3xl mb-3 opacity-80">📚</div>
-                    <div class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 tracking-wider uppercase">Librarian</div>
-                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1">Curating media</div>
-                </div>
-                <div class="agent-card bg-slate-100 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 text-center transition-all duration-500">
-                    <div class="text-3xl mb-3 opacity-80">📅</div>
-                    <div class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 tracking-wider uppercase">Scheduler</div>
-                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1">Calendar sync</div>
-                </div>
-                <div class="agent-card bg-slate-100 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 text-center transition-all duration-500">
-                    <div class="text-3xl mb-3 opacity-80">🗄️</div>
-                    <div class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 tracking-wider uppercase">Memory</div>
-                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1">Saving state</div>
-                </div>
-            </div>
-        </div>
 
-        <div id="error-banner" class="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400 p-5 rounded-2xl mb-8 flex items-start gap-4 shadow-lg animate-fade-in-up">
-            <div class="bg-red-100 dark:bg-red-500/20 p-2 rounded-full flex-shrink-0 mt-0.5">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <div class="flex gap-7 mb-8" style="border-bottom: 1px solid var(--border)">
+                <button id="tab-learning" onclick="switchTab('learning')" class="tab active">Learning</button>
+                <button id="tab-interview" onclick="switchTab('interview')" class="tab">Interview prep</button>
             </div>
-            <div class="flex-1">
-                <div class="font-bold text-base md:text-lg mb-1">Deployment Failed</div>
-                <div id="error-msg" class="text-xs md:text-sm font-medium opacity-90 leading-relaxed"></div>
-            </div>
-            <button onclick="document.getElementById('error-banner').classList.add('hidden')" class="text-red-400 hover:text-red-600 font-bold p-1">✕</button>
-        </div>
 
-        <div id="results" class="hidden space-y-8 fade-in pb-12">
-
-            <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl dark:shadow-none">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-5">
+            <div class="card p-7 md:p-9 mb-8">
+                <form id="notschool-form" class="space-y-8">
                     <div>
-                        <h3 class="text-2xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight" id="plan-title">Your Learning Roadmap</h3>
-                        <p class="text-[10px] md:text-xs font-bold text-slate-500 tracking-[0.2em] uppercase mt-2">AI Generated Pathway</p>
+                        <label class="text-[10px] font-semibold tracking-[0.18em] uppercase mb-3 block" style="color: var(--text-muted)">
+                            <span id="form-title">What do you want to master today?</span>
+                        </label>
+                        <div class="relative pb-3" style="border-bottom: 1px solid var(--border-strong)">
+                            <input type="text" id="goal" required maxlength="200"
+                                placeholder="e.g., Learn Next.js and Tailwind from scratch"
+                                class="input-bare text-xl md:text-2xl font-medium pr-16">
+                            <span id="char-count" class="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] font-mono" style="color: var(--text-faint)">0/200</span>
+                            <div class="absolute -bottom-px left-0 h-px bg-accent w-0 transition-all duration-500" id="goal-underline"></div>
+                        </div>
                     </div>
-                    <div id="calendar-container" class="hidden bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-500/30 font-bold text-xs md:text-sm flex items-center gap-3 shadow-sm">
-                        <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span></span>
-                        <a id="calendar-link" href="#" target="_blank" class="hover:underline">View Calendar Event</a>
+
+                    <div id="drop-zone" class="drop-zone group cursor-pointer p-7 text-center">
+                        <svg class="mx-auto h-7 w-7 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color: var(--text-faint)">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="text-sm font-medium">Drop a syllabus or job description</p>
+                        <p class="text-xs mt-1" style="color: var(--text-muted)">PNG, JPG, WebP — or click to browse</p>
+                        <input type="file" id="file-upload" class="hidden" accept="image/*">
+                        <div id="file-preview" class="hidden mt-4 inline-flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg text-xs font-medium"
+                             style="background: var(--surface); border: 1px solid var(--border-strong);">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span id="file-name" class="max-w-[160px] truncate">No file</span>
+                            <button type="button" id="clear-file" class="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--surface-2)]" style="color: var(--text-muted)">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="btn btn-primary w-full h-12 text-sm">
+                        <span>Deploy agents</span>
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 12h15"/></svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Loading -->
+            <div id="loading" class="hidden card p-7 mb-8 animate-fade-in-up">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="spinner"></div>
+                    <div>
+                        <div class="text-sm font-semibold">Synthesizing curriculum</div>
+                        <div class="text-[10px] tracking-[0.18em] uppercase mt-0.5" style="color: var(--text-faint)">Agents working in parallel</div>
                     </div>
                 </div>
-                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 overflow-x-auto border border-slate-200 dark:border-slate-800 flex justify-center min-h-[160px] items-center">
-                    <div id="mermaid-output"></div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="agent-step agent-card">
+                        <div class="text-[11px] font-semibold mb-1.5" style="color: var(--text)">Architect</div>
+                        <div class="text-[10px]" style="color: var(--text-muted)">Structure</div>
+                    </div>
+                    <div class="agent-step agent-card">
+                        <div class="text-[11px] font-semibold mb-1.5" style="color: var(--text)">Librarian</div>
+                        <div class="text-[10px]" style="color: var(--text-muted)">Resources</div>
+                    </div>
+                    <div class="agent-step agent-card">
+                        <div class="text-[11px] font-semibold mb-1.5" style="color: var(--text)">Scheduler</div>
+                        <div class="text-[10px]" style="color: var(--text-muted)">Calendar</div>
+                    </div>
+                    <div class="agent-step agent-card">
+                        <div class="text-[11px] font-semibold mb-1.5" style="color: var(--text)">Memory</div>
+                        <div class="text-[10px]" style="color: var(--text-muted)">Persist</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div class="lg:col-span-8 glass-card p-6 md:p-8 rounded-3xl shadow-xl dark:shadow-none">
-                    <h3 class="text-[10px] md:text-xs font-bold mb-6 text-slate-500 tracking-[0.2em] uppercase flex items-center gap-3">
-                        <svg class="w-4 h-4 md:w-5 md:h-5 text-brand-red" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-                        Curated Media
-                    </h3>
-                    <ul id="youtube-output" class="space-y-4"></ul>
+            <div id="error-banner" class="hidden p-4 rounded-xl mb-6 flex items-start gap-3 animate-fade-in-up"
+                 style="background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); color: #DC2626;">
+                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div class="flex-1">
+                    <div class="text-sm font-semibold mb-0.5">Deployment failed</div>
+                    <div id="error-msg" class="text-xs opacity-90"></div>
                 </div>
+                <button onclick="document.getElementById('error-banner').classList.add('hidden')" class="opacity-60 hover:opacity-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
 
-                <div class="lg:col-span-4 space-y-6 md:space-y-8">
-                    <div id="trends-container" class="hidden glass-card p-6 md:p-8 rounded-3xl shadow-xl dark:shadow-none">
-                        <h3 class="text-[10px] md:text-xs font-bold mb-5 text-brand-orange tracking-[0.2em] uppercase flex items-center gap-2">🔥 Industry Trends</h3>
-                        <div id="trends-output" class="flex flex-wrap gap-2"></div>
+            <div id="generate-success" class="hidden card p-6 animate-fade-in-up" style="border-color: rgba(249,115,22,0.3); background: rgba(249,115,22,0.04);">
+                <div class="flex items-start gap-4">
+                    <div class="w-9 h-9 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     </div>
-                    <div id="certs-container" class="hidden glass-card p-6 md:p-8 rounded-3xl shadow-xl dark:shadow-none">
-                        <h3 class="text-[10px] md:text-xs font-bold mb-5 text-brand-yellow tracking-[0.2em] uppercase flex items-center gap-2">🏆 Top Certifications</h3>
-                        <div id="certs-output" class="flex flex-col gap-3"></div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-base mb-1">Roadmap generated</h3>
+                        <p class="text-sm mb-4" style="color: var(--text-muted)">Your full plan, videos, quizzes, and calendar events are ready.</p>
+                        <button id="goto-detail-btn" class="btn btn-primary">View roadmap →</button>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <div id="modules-container" class="hidden glass-card p-6 md:p-8 rounded-3xl shadow-xl dark:shadow-none">
-                <h3 class="text-[10px] md:text-xs font-bold mb-6 text-slate-500 tracking-[0.2em] uppercase flex items-center gap-3">
-                    <span class="w-6 md:w-8 h-[2px] bg-brand-orange"></span> Curriculum Breakdown
-                </h3>
-                <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 dark:bg-slate-900/80 text-xs text-slate-500 uppercase tracking-wider font-bold">
-                            <tr>
-                                <th class="px-6 py-4 rounded-tl-2xl">Day</th>
-                                <th class="px-6 py-4">Topic</th>
-                                <th class="px-6 py-4">Description</th>
-                                <th class="px-6 py-4 text-right rounded-tr-2xl">Hours</th>
-                            </tr>
-                        </thead>
-                        <tbody id="modules-output" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody>
-                    </table>
+        <!-- ============ DASHBOARD VIEW ============ -->
+        <section id="dashboard-view" class="hidden view">
+            <div class="mb-8 flex items-end justify-between flex-wrap gap-4">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-semibold tracking-tight mb-2">Dashboard</h2>
+                    <p class="text-sm" style="color: var(--text-muted)">Your learning overview.</p>
+                </div>
+                <button onclick="showView('generate')" class="btn btn-primary">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    New roadmap
+                </button>
+            </div>
+
+            <div id="dashboard-stats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10"></div>
+
+            <div class="flex justify-between items-baseline mb-5">
+                <h3 class="text-sm font-semibold tracking-wide">Roadmaps</h3>
+                <span id="curricula-count" class="text-xs" style="color: var(--text-faint)"></span>
+            </div>
+
+            <div id="curricula-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+            <div id="dashboard-empty" class="hidden card p-12 text-center">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center" style="background: var(--surface-2)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color: var(--text-muted)"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                </div>
+                <h3 class="font-semibold text-base mb-1">No roadmaps yet</h3>
+                <p class="text-sm mb-6" style="color: var(--text-muted)">Generate your first AI-powered learning plan.</p>
+                <button onclick="showView('generate')" class="btn btn-primary">Get started</button>
+            </div>
+        </section>
+
+        <!-- ============ CURRICULUM DETAIL VIEW ============ -->
+        <section id="detail-view" class="hidden view space-y-6">
+            <button onclick="showView('dashboard')" class="text-sm font-medium flex items-center gap-1.5 hover:text-accent transition" style="color: var(--text-muted)">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                Back to dashboard
+            </button>
+
+            <div class="card p-7">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+                    <div class="flex-1 min-w-0">
+                        <h2 id="detail-title" class="text-2xl md:text-3xl font-semibold tracking-tight mb-2 leading-tight">—</h2>
+                        <p id="detail-meta" class="text-xs tracking-wide" style="color: var(--text-muted)">—</p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <div id="detail-progress" class="text-xs font-medium px-3 py-1.5 rounded-lg" style="background: var(--surface-2); color: var(--text-muted)"></div>
+                        <button id="delete-curriculum-btn" class="btn btn-danger-ghost text-xs h-9 px-3">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+
+                <div class="rounded-xl p-5 overflow-x-auto flex justify-center min-h-[160px] items-center" style="background: var(--surface-2); border: 1px solid var(--border)">
+                    <div id="detail-mermaid"></div>
                 </div>
             </div>
-            
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div id="detail-trends" class="hidden card p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-1 h-4 rounded-full bg-accent"></div>
+                        <h4 class="text-[10px] font-semibold tracking-[0.18em] uppercase" style="color: var(--text-muted)">Industry trends</h4>
+                    </div>
+                    <div id="detail-trends-out" class="flex flex-wrap gap-1.5"></div>
+                </div>
+                <div id="detail-certs" class="hidden card p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-1 h-4 rounded-full" style="background: #EAB308"></div>
+                        <h4 class="text-[10px] font-semibold tracking-[0.18em] uppercase" style="color: var(--text-muted)">Certifications</h4>
+                    </div>
+                    <div id="detail-certs-out" class="flex flex-col gap-1.5"></div>
+                </div>
+                <div id="detail-opps" class="hidden card p-5 lg:col-span-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-1 h-4 rounded-full" style="background: #10B981"></div>
+                        <h4 class="text-[10px] font-semibold tracking-[0.18em] uppercase" style="color: var(--text-muted)">Industry opportunities</h4>
+                    </div>
+                    <div id="detail-opps-out" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 mt-8 mb-3">
+                <div class="w-1 h-5 rounded-full bg-accent"></div>
+                <h3 class="text-base font-semibold">Planner</h3>
+            </div>
+            <div id="modules-planner" class="space-y-3"></div>
+        </section>
+    </header>
+
+    <!-- DOUBTS FAB -->
+    <button id="doubts-fab" class="hidden fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-accent text-white shadow-glow hover:scale-105 active:scale-95 transition-transform flex items-center justify-center" aria-label="Ask a doubt">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+    </button>
+
+    <!-- DOUBTS PANEL -->
+    <aside id="doubts-panel" class="doubts-panel fixed inset-y-0 right-0 z-40 w-full md:w-[420px] flex flex-col translate-x-full"
+        style="background: var(--surface); border-left: 1px solid var(--border); box-shadow: -20px 0 50px -20px rgba(0,0,0,0.15);">
+        <div class="p-5 flex items-center justify-between" style="border-bottom: 1px solid var(--border)">
+            <div>
+                <h3 class="font-semibold text-base">Ask a doubt</h3>
+                <p class="text-[10px] tracking-[0.18em] uppercase mt-0.5" style="color: var(--text-faint)">Your AI tutor</p>
+            </div>
+            <button id="close-doubts-btn" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--surface-2)] transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="doubts-history" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
+        <form id="doubt-form" class="p-4" style="border-top: 1px solid var(--border); background: var(--surface-2)">
+            <div class="flex gap-2 items-center card p-1.5" style="border-radius: 12px;">
+                <input type="text" id="doubt-input" placeholder="Ask anything about your roadmap…"
+                    class="input-bare flex-1 px-3 py-1.5 text-sm" required>
+                <button type="submit" class="btn btn-primary h-8 px-3 text-xs">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                </button>
+            </div>
+        </form>
+    </aside>
+
+    <!-- QUIZ MODAL -->
+    <div id="quiz-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" style="background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);">
+        <div class="card max-w-2xl w-full max-h-[88vh] overflow-hidden flex flex-col animate-slide-up" style="border-radius: 18px;">
+            <div class="p-5 flex items-center justify-between" style="border-bottom: 1px solid var(--border)">
+                <div>
+                    <h3 id="quiz-title" class="font-semibold text-base">Quiz</h3>
+                    <p id="quiz-subtitle" class="text-[10px] tracking-[0.18em] uppercase mt-1" style="color: var(--text-faint)">—</p>
+                </div>
+                <button id="close-quiz-btn" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--surface-2)] transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="quiz-body" class="flex-1 overflow-y-auto p-6"></div>
+            <div id="quiz-footer" class="p-4 flex justify-between items-center" style="border-top: 1px solid var(--border); background: var(--surface-2)">
+                <div id="quiz-progress" class="text-xs font-medium" style="color: var(--text-muted)">—</div>
+                <button id="quiz-action-btn" class="btn btn-primary">Submit</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- Theme Toggle Logic ---
+        // =============================================================
+        //  THEME
+        // =============================================================
         const themeToggleBtn = document.getElementById('themeToggle');
         const sunIcon = document.getElementById('sunIcon');
         const moonIcon = document.getElementById('moonIcon');
-        
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-            sunIcon.classList.remove('hidden');
-            moonIcon.classList.add('hidden');
-        } else {
-            document.documentElement.classList.remove('dark');
+        function applyTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark'); sunIcon.classList.remove('hidden'); moonIcon.classList.add('hidden');
+            } else { document.documentElement.classList.remove('dark'); sunIcon.classList.add('hidden'); moonIcon.classList.remove('hidden'); }
         }
-
+        applyTheme();
         themeToggleBtn.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            if (document.documentElement.classList.contains('dark')) {
-                localStorage.theme = 'dark';
-                sunIcon.classList.remove('hidden');
-                moonIcon.classList.add('hidden');
-            } else {
-                localStorage.theme = 'light';
-                sunIcon.classList.add('hidden');
-                moonIcon.classList.remove('hidden');
-            }
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            applyTheme();
         });
 
-        // --- Core Application State ---
-        let currentMode = 'learning';
-        let userAccessToken = null;
+        // =============================================================
+        //  STATE
+        // =============================================================
+        let userAccessToken = localStorage.getItem('notschool_access_token') || null;
+        let currentUser = null;
         let tokenClient;
+        let currentMode = 'learning';
         let selectedFile = null;
+        let lastGeneratedCurriculumId = null;
+        let activeCurriculumId = null;
+        let activeModuleDay = null;
+        let currentQuiz = null;
+        let currentAnswers = [];
 
-        // --- Agent Animation Logic ---
-        let agentTimer = null;
-
-        function startAgentAnimation() {
-            const cards = document.querySelectorAll('.agent-card');
-            let step = 0;
-            agentTimer = setInterval(() => {
-                cards.forEach((c, i) => {
-                    // Reset
-                    c.classList.remove('agent-active', 'border-brand-orange', 'bg-brand-orange/5', 'opacity-50', 'dark:bg-emerald-900/20', 'border-emerald-500/30', 'dark:text-emerald-400');
-                    const title = c.querySelector('.font-bold');
-                    title.classList.remove('text-emerald-600', 'dark:text-emerald-400', 'text-brand-orange');
-                    
-                    if (i < step) {
-                        // Completed
-                        c.classList.add('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-200', 'dark:border-emerald-500/30');
-                        title.classList.add('text-emerald-600', 'dark:text-emerald-400');
-                    } else if (i === step) {
-                        // Active
-                        c.classList.add('agent-active', 'bg-brand-orange/5', 'border-brand-orange');
-                        title.classList.add('text-brand-orange');
-                    } else {
-                        // Pending
-                        c.classList.add('bg-slate-100', 'dark:bg-slate-800/50', 'border-slate-200', 'dark:border-slate-700/50', 'opacity-50');
-                    }
-                });
-                step = (step + 1) % (cards.length + 1);
-            }, 1800);
+        // =============================================================
+        //  API HELPERS
+        // =============================================================
+        let _signOutNotified = false;
+        async function api(path, opts = {}) {
+            const headers = opts.headers || {};
+            if (userAccessToken) headers['Authorization'] = 'Bearer ' + userAccessToken;
+            const res = await fetch(path, { ...opts, headers });
+            if (res.status === 401) {
+                if (!_signOutNotified) {
+                    _signOutNotified = true;
+                    handleSignOut('Session expired. Please sign in again.');
+                }
+                throw new Error('Unauthorized');
+            }
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(json.detail || `HTTP ${res.status}`);
+            return json;
         }
 
-        function stopAgentAnimation() {
-            if (agentTimer) { clearInterval(agentTimer); agentTimer = null; }
-            const cards = document.querySelectorAll('.agent-card');
-            cards.forEach(c => {
-                c.classList.remove('agent-active', 'opacity-50', 'border-brand-orange', 'bg-brand-orange/5', 'bg-slate-100', 'dark:bg-slate-800/50', 'border-slate-200', 'dark:border-slate-700/50');
-                c.classList.add('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-200', 'dark:border-emerald-500/30');
-                const title = c.querySelector('.font-bold');
-                title.classList.remove('text-brand-orange');
-                title.classList.add('text-emerald-600', 'dark:text-emerald-400');
+        // =============================================================
+        //  AUTH
+        // =============================================================
+        const loginOverlay = document.getElementById('login-overlay');
+        const userChip = document.getElementById('user-chip');
+        const userPic = document.getElementById('user-pic');
+        const userName = document.getElementById('user-name');
+        const mainNav = document.getElementById('main-nav');
+        const doubtsFab = document.getElementById('doubts-fab');
+
+        window.onload = function () {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: '583271943826-l2go9nbmei40at92uohkt3en2iif9c81.apps.googleusercontent.com',
+                scope: 'openid email profile https://www.googleapis.com/auth/calendar.events',
+                callback: async (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        userAccessToken = tokenResponse.access_token;
+                        localStorage.setItem('notschool_access_token', userAccessToken);
+                        await initializeAfterLogin();
+                    }
+                },
+            });
+
+            if (userAccessToken) {
+                initializeAfterLogin().catch(() => handleSignOut());
+            }
+        };
+
+        document.getElementById('login-btn').addEventListener('click', () => {
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            try {
+                if (userAccessToken && window.google?.accounts?.oauth2) {
+                    google.accounts.oauth2.revoke(userAccessToken, () => {});
+                }
+            } catch (e) { /* ignore */ }
+            handleSignOut('You have been signed out.');
+        });
+
+        async function initializeAfterLogin() {
+            _signOutNotified = false;
+            try {
+                const result = await api('/api/auth/verify', { method: 'POST' });
+                currentUser = result.user;
+                userPic.src = safeUrl(currentUser.picture) || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="%23F97316"/></svg>';
+                userName.textContent = (currentUser.name || currentUser.email || '').split(' ')[0];
+                userChip.classList.remove('hidden');
+                userChip.classList.add('inline-flex');
+                mainNav.classList.remove('hidden');
+                doubtsFab.classList.remove('hidden');
+                loginOverlay.classList.add('hidden-view');
+                showView('dashboard');
+            } catch (e) {
+                console.error(e); handleSignOut();
+            }
+        }
+
+        function handleSignOut(msg) {
+            userAccessToken = null;
+            currentUser = null;
+            localStorage.removeItem('notschool_access_token');
+            loginOverlay.classList.remove('hidden-view');
+            userChip.classList.add('hidden');
+            userChip.classList.remove('inline-flex');
+            mainNav.classList.add('hidden');
+            doubtsFab.classList.add('hidden');
+            ['generate-view','dashboard-view','detail-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            if (msg) showToast(msg, 'error');
+        }
+
+        // =============================================================
+        //  VIEW NAVIGATION
+        // =============================================================
+        function showView(view) {
+            ['generate','dashboard','detail'].forEach(v => {
+                const el = document.getElementById(v + '-view');
+                el.classList.add('hidden');
+                el.classList.remove('view');
+            });
+            const target = document.getElementById(view + '-view');
+            target.classList.remove('hidden');
+            // re-trigger animation
+            void target.offsetWidth;
+            target.classList.add('view');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.dataset.view === view || (view === 'detail' && btn.dataset.view === 'dashboard')) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Leaving the curriculum detail clears the contextual scope so a follow-up
+            // doubt or quiz call doesn't keep targeting the previous curriculum/module.
+            if (view !== 'detail') {
+                activeCurriculumId = null;
+                activeModuleDay = null;
+            }
+
+            if (view === 'dashboard') { loadDashboard(); maybeAutoReschedule(); }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => showView(btn.dataset.view));
+        });
+
+        // =============================================================
+        //  DASHBOARD
+        // =============================================================
+        async function loadDashboard() {
+            try {
+                const data = await api('/api/dashboard');
+                renderStats(data.stats);
+                renderCurricula(data.curricula);
+            } catch (e) { console.error(e); }
+        }
+
+        function renderStats(stats) {
+            const wrap = document.getElementById('dashboard-stats');
+            wrap.innerHTML = `
+                ${statCard('Roadmaps', stats.total_curricula)}
+                ${statCard('Sessions', stats.total_sessions)}
+                ${statCard('Completed', stats.completed_sessions)}
+                ${statCard('Progress', stats.completion_pct + '%', true)}
+            `;
+        }
+        function statCard(label, val, accent) {
+            return `<div class="card p-5 card-hover">
+                <div class="text-[10px] font-semibold tracking-[0.18em] uppercase mb-2" style="color: var(--text-muted)">${label}</div>
+                <div class="text-2xl md:text-3xl font-semibold tracking-tight ${accent ? 'text-accent' : ''}" ${accent ? 'style="color:#F97316"' : ''}>${val}</div>
+            </div>`;
+        }
+
+        function renderCurricula(list) {
+            const wrap = document.getElementById('curricula-list');
+            const empty = document.getElementById('dashboard-empty');
+            const counter = document.getElementById('curricula-count');
+            wrap.innerHTML = '';
+            if (!list || list.length === 0) {
+                empty.classList.remove('hidden');
+                wrap.classList.add('hidden');
+                counter.textContent = '';
+                return;
+            }
+            empty.classList.add('hidden');
+            wrap.classList.remove('hidden');
+            counter.textContent = `${list.length} total`;
+            list.forEach((c, idx) => {
+                const date = parseUtcDate(c.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                const modeLabel = c.mode === 'interview' ? 'Interview' : 'Learning';
+                const card = document.createElement('div');
+                card.className = 'card card-hover p-5 cursor-pointer animate-fade-in-up';
+                card.style.animationDelay = (idx * 40) + 'ms';
+                card.onclick = () => openCurriculum(c.id);
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <span class="pill">${modeLabel}</span>
+                        <span class="text-[10px] font-mono" style="color: var(--text-faint)">${date}</span>
+                    </div>
+                    <h3 class="font-semibold text-[15px] mb-1.5 line-clamp-2 leading-snug">${escapeHtml(c.title || c.goal)}</h3>
+                    <p class="text-xs line-clamp-2 mb-5" style="color: var(--text-muted)">${escapeHtml(c.goal)}</p>
+                    <div class="flex items-center justify-between text-xs mb-2">
+                        <span style="color: var(--text-muted)"><span class="font-semibold" style="color: var(--text)">${c.completed_modules}/${c.total_modules}</span> modules</span>
+                        <span class="font-semibold" style="color: #F97316">${c.progress_pct}%</span>
+                    </div>
+                    <div class="progress-track"><div class="progress-fill" style="width: ${c.progress_pct}%"></div></div>
+                `;
+                wrap.appendChild(card);
             });
         }
 
-        function showError(msg) {
-            document.getElementById('error-msg').textContent = msg;
-            document.getElementById('error-banner').classList.remove('hidden');
+        // =============================================================
+        //  CURRICULUM DETAIL
+        // =============================================================
+        async function openCurriculum(curriculumId) {
+            activeCurriculumId = curriculumId;
+            try {
+                const data = await api(`/api/curriculum/${curriculumId}`);
+                renderDetail(data.curriculum, data.sessions);
+                showView('detail');
+            } catch (e) { console.error(e); showToast('Failed to load roadmap', 'error'); }
         }
 
-        // --- Drag and Drop Logic ---
+        async function renderDetail(curriculum, sessions) {
+            document.getElementById('detail-title').innerText = curriculum.title || curriculum.goal;
+            const created = parseUtcDate(curriculum.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+            document.getElementById('detail-meta').innerText = `${curriculum.mode === 'interview' ? 'Interview prep' : 'Learning'} · ${created}`;
+
+            const total = sessions.length;
+            const done = sessions.filter(s => s.status === 'completed').length;
+            const pct = total ? Math.round(done / total * 100) : 0;
+            document.getElementById('detail-progress').innerText = `${done}/${total} · ${pct}%`;
+
+            const cj = curriculum.curriculum_json || {};
+            let def = "graph TD;\n";
+            const mods = cj.modules || [];
+            if (mods.length > 0) {
+                let prev = null;
+                mods.forEach((m, i) => {
+                    const id = `N${i}`;
+                    const safe = (m.topic || 'Module').replace(/[^a-zA-Z0-9 \-]/g, "").trim();
+                    def += `  ${id}["Day ${m.day || i+1}: ${safe}\n${m.duration_hours || 1}h"];\n`;
+                    if (prev) def += `  ${prev} --> ${id};\n`;
+                    prev = id;
+                });
+            } else { def += "  Start --> End;\n"; }
+            try {
+                const { svg } = await mermaid.render('mg-' + Date.now(), def);
+                document.getElementById('detail-mermaid').innerHTML = svg;
+            } catch { document.getElementById('detail-mermaid').innerHTML = ''; }
+
+            const trendsBox = document.getElementById('detail-trends');
+            const trendsOut = document.getElementById('detail-trends-out');
+            trendsOut.innerHTML = '';
+            const allTrends = [...(curriculum.web_trends || []), ...(cj.trends || [])];
+            if (allTrends.length > 0) {
+                trendsBox.classList.remove('hidden');
+                [...new Set(allTrends)].slice(0, 10).forEach(t => {
+                    trendsOut.innerHTML += `<span class="pill pill-accent">${escapeHtml(t)}</span>`;
+                });
+            } else trendsBox.classList.add('hidden');
+
+            const certsBox = document.getElementById('detail-certs');
+            const certsOut = document.getElementById('detail-certs-out');
+            certsOut.innerHTML = '';
+            if ((cj.certifications || []).length > 0) {
+                certsBox.classList.remove('hidden');
+                cj.certifications.forEach(c => {
+                    certsOut.innerHTML += `<div class="text-xs px-3 py-2 rounded-lg" style="background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.2); color: #CA8A04;">${escapeHtml(c)}</div>`;
+                });
+            } else certsBox.classList.add('hidden');
+
+            const oppsBox = document.getElementById('detail-opps');
+            const oppsOut = document.getElementById('detail-opps-out');
+            oppsOut.innerHTML = '';
+            const liveOpps = (curriculum.opportunities || []).filter(o => o.source !== 'error');
+            const currOpps = (cj.opportunities || []);
+            const allOpps = [...currOpps, ...liveOpps].slice(0, 8);
+            if (allOpps.length > 0) {
+                oppsBox.classList.remove('hidden');
+                allOpps.forEach(o => {
+                    const t = (o.type || 'program').toLowerCase();
+                    const safeOppUrl = safeUrl(o.url);
+                    const titleHtml = safeOppUrl ? `<a href="${safeOppUrl}" target="_blank" rel="noopener noreferrer" class="hover:text-accent transition" style="color: var(--text)">${escapeHtml(o.title || 'Opportunity')}</a>` : escapeHtml(o.title || 'Opportunity');
+                    oppsOut.innerHTML += `
+                    <div class="p-3 rounded-xl" style="background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.18);">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <div class="font-semibold text-sm leading-snug">${titleHtml}</div>
+                            <span class="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background: rgba(16,185,129,0.12); color: #059669;">${t}</span>
+                        </div>
+                        ${o.description ? `<p class="text-[11px] line-clamp-2" style="color: var(--text-muted)">${escapeHtml(o.description)}</p>` : ''}
+                    </div>`;
+                });
+            } else oppsBox.classList.add('hidden');
+
+            renderPlanner(sessions);
+
+            document.getElementById('delete-curriculum-btn').onclick = async () => {
+                if (!confirm('Delete this roadmap and all its calendar events?')) return;
+                try {
+                    await api(`/api/curriculum/${curriculum.id}`, { method: 'DELETE' });
+                    showToast('Roadmap deleted');
+                    showView('dashboard');
+                } catch (e) { showToast('Failed: ' + e.message, 'error'); }
+            };
+        }
+
+        function renderPlanner(sessions) {
+            const wrap = document.getElementById('modules-planner');
+            wrap.innerHTML = '';
+            if (!sessions || sessions.length === 0) {
+                wrap.innerHTML = `<p class="text-sm" style="color: var(--text-muted)">No sessions found.</p>`; return;
+            }
+            sessions.forEach((s, idx) => {
+                const dateStr = formatDate(s.scheduled_time);
+                const isDone = s.status === 'completed';
+                const safeYt = safeUrl(s.youtube_url);
+                const safeCal = safeUrl(s.event_link);
+
+                const ytBtn = safeYt
+                    ? `<a href="${safeYt}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary text-xs h-9">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                          Video
+                       </a>`
+                    : `<button disabled class="btn btn-secondary text-xs h-9 opacity-40 cursor-not-allowed">Video N/A</button>`;
+                const calBtn = safeCal
+                    ? `<a href="${safeCal}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary text-xs h-9">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                          Calendar
+                       </a>`
+                    : `<button disabled class="btn btn-secondary text-xs h-9 opacity-40 cursor-not-allowed">No cal</button>`;
+                const quizLabel = s.quiz_score != null ? `Quiz ${s.quiz_score}/${s.quiz_total}` : 'Quiz';
+                const quizBtn = `<button onclick="openQuiz(${s.curriculum_id}, ${s.module_day}, '${escapeJs(s.module_name)}')" class="btn btn-secondary text-xs h-9">
+                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                       ${quizLabel}
+                   </button>`;
+                const doubtBtn = `<button onclick="openDoubtsForModule(${s.curriculum_id}, ${s.module_day})" class="btn btn-secondary text-xs h-9">
+                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                       Doubt
+                   </button>`;
+                const completeBtn = isDone
+                    ? `<button class="btn text-xs h-9 cursor-default" style="background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.25);">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                          Done
+                       </button>`
+                    : `<button onclick="completeSession(${s.id})" class="btn btn-primary text-xs h-9">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                          Mark done
+                       </button>`;
+
+                const row = document.createElement('div');
+                row.className = 'card p-5 animate-fade-in-up' + (isDone ? ' opacity-70' : '');
+                row.style.animationDelay = (idx * 30) + 'ms';
+                row.innerHTML = `
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-xl flex flex-col items-center justify-center" style="background: var(--surface-2); border: 1px solid var(--border);">
+                            <div class="text-[8px] font-semibold tracking-wider uppercase" style="color: var(--text-faint)">Day</div>
+                            <div class="text-base font-semibold leading-none">${s.module_day || '?'}</div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold text-[15px] leading-snug ${isDone ? 'line-through' : ''}">${escapeHtml(s.module_name)}</h4>
+                            <p class="text-xs mt-1 line-clamp-2" style="color: var(--text-muted)">${escapeHtml(s.module_description || '')}</p>
+                            <div class="flex items-center gap-3 text-[10px] mt-2 font-medium tracking-wide uppercase" style="color: var(--text-faint)">
+                                <span>${dateStr}</span>
+                                <span>·</span>
+                                <span>${s.duration_hours || 1}h</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                        ${ytBtn}${calBtn}${quizBtn}${doubtBtn}${completeBtn}
+                    </div>
+                `;
+                wrap.appendChild(row);
+            });
+        }
+
+        async function completeSession(sessionId) {
+            try {
+                const fd = new FormData(); fd.append('session_id', sessionId);
+                await api('/api/session/complete', { method: 'POST', body: fd });
+                showToast('Session marked complete');
+                if (activeCurriculumId) openCurriculum(activeCurriculumId);
+            } catch (e) { showToast('Failed: ' + e.message, 'error'); }
+        }
+
+        // =============================================================
+        //  QUIZ
+        // =============================================================
+        const quizModal = document.getElementById('quiz-modal');
+        document.getElementById('close-quiz-btn').addEventListener('click', () => quizModal.classList.add('hidden'));
+        quizModal.addEventListener('click', (e) => { if (e.target === quizModal) quizModal.classList.add('hidden'); });
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            if (!quizModal.classList.contains('hidden')) { quizModal.classList.add('hidden'); return; }
+            if (!doubtsPanel.classList.contains('translate-x-full')) doubtsPanel.classList.add('translate-x-full');
+        });
+
+        async function openQuiz(curriculumId, moduleDay, topic, opts = {}) {
+            const force = !!opts.force;
+            quizModal.classList.remove('hidden');
+            document.getElementById('quiz-title').innerText = force ? 'Regenerating quiz…' : 'Loading quiz…';
+            document.getElementById('quiz-subtitle').innerText = topic;
+            document.getElementById('quiz-body').innerHTML = `<div class="flex items-center justify-center py-16"><div class="spinner"></div></div>`;
+            document.getElementById('quiz-progress').innerText = '';
+            document.getElementById('quiz-action-btn').classList.add('hidden');
+            try {
+                const fd = new FormData();
+                fd.append('curriculum_id', curriculumId);
+                fd.append('module_day', moduleDay);
+                if (force) fd.append('force', 'true');
+                const data = await api('/api/quiz/generate', { method: 'POST', body: fd });
+                currentQuiz = data.quiz;
+                currentQuiz._curriculumId = curriculumId;
+                currentQuiz._moduleDay = moduleDay;
+                currentQuiz._topic = topic;
+                currentAnswers = new Array(currentQuiz.questions.length).fill(null);
+                renderQuiz();
+            } catch (e) {
+                document.getElementById('quiz-body').innerHTML = `
+                    <div class="text-center py-12 px-4">
+                        <div class="font-semibold mb-2">Quiz couldn't be generated</div>
+                        <p class="text-sm mb-6" style="color: var(--text-muted)">${escapeHtml(e.message || 'Unknown error')}</p>
+                        <button id="quiz-retry-btn" class="btn btn-primary">Try again</button>
+                    </div>`;
+                document.getElementById('quiz-action-btn').classList.add('hidden');
+                document.getElementById('quiz-retry-btn').onclick = () => openQuiz(curriculumId, moduleDay, topic, opts);
+            }
+        }
+
+        function renderQuiz() {
+            document.getElementById('quiz-title').innerText = `Quiz: ${currentQuiz.module_topic || 'Module'}`;
+            const prevScore = (currentQuiz.score != null && currentQuiz.total)
+                ? ` · Last attempt: ${currentQuiz.score}/${currentQuiz.total}`
+                : '';
+            document.getElementById('quiz-subtitle').innerText =
+                `${currentQuiz.questions.length} questions · Test your knowledge${prevScore}`;
+            const body = document.getElementById('quiz-body');
+
+            // Build the questions HTML first, so we can set innerHTML once and avoid
+            // clobbering any nested event listeners with repeated `innerHTML +=`.
+            const canRegen = currentQuiz._curriculumId != null && currentQuiz._moduleDay != null;
+            const bannerHtml = canRegen ? `
+                <div class="mb-5 flex items-center justify-between gap-3 rounded-lg p-3 text-xs"
+                     style="background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted);">
+                    <span>Want different questions on the same topic?</span>
+                    <button id="quiz-regen-btn" type="button" class="btn btn-ghost text-xs h-7 px-2.5">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Generate fresh
+                    </button>
+                </div>` : '';
+
+            const questionsHtml = currentQuiz.questions.map((q, qi) => {
+                const opts = q.options.map((opt, oi) => `
+                    <label class="quiz-option">
+                        <input type="radio" name="q${qi}" value="${oi}" class="mt-0.5 accent-accent" onchange="setAnswer(${qi}, ${oi})" ${currentAnswers[qi] === oi ? 'checked' : ''}>
+                        <span class="text-sm leading-relaxed">${escapeHtml(opt)}</span>
+                    </label>`).join('');
+                const isLast = qi === currentQuiz.questions.length - 1;
+                return `
+                    <div class="mb-6 pb-6"${isLast ? '' : ' style="border-bottom: 1px solid var(--border);"'}>
+                        <div class="font-semibold mb-3 text-sm md:text-[15px]"><span class="text-accent" style="color:#F97316">${qi+1}.</span> ${escapeHtml(q.question)}</div>
+                        <div class="space-y-2">${opts}</div>
+                    </div>`;
+            }).join('');
+
+            body.innerHTML = bannerHtml + questionsHtml;
+
+            const regenBtn = document.getElementById('quiz-regen-btn');
+            if (regenBtn) {
+                regenBtn.onclick = () => {
+                    if (!confirm('Replace the current quiz with a brand-new set of questions? Your previous score will be cleared.')) return;
+                    openQuiz(currentQuiz._curriculumId, currentQuiz._moduleDay, currentQuiz._topic, { force: true });
+                };
+            }
+
+            const btn = document.getElementById('quiz-action-btn');
+            btn.classList.remove('hidden');
+            btn.innerText = 'Submit quiz';
+            btn.onclick = submitQuiz;
+            document.getElementById('quiz-progress').innerText = `${currentQuiz.questions.length} questions`;
+        }
+
+        function setAnswer(qi, oi) { currentAnswers[qi] = oi; }
+
+        async function submitQuiz() {
+            const unanswered = currentAnswers.filter(a => a === null).length;
+            if (unanswered > 0 && !confirm(`${unanswered} question(s) unanswered. Submit anyway?`)) return;
+            let score = 0;
+            currentQuiz.questions.forEach((q, i) => { if (currentAnswers[i] === q.correct_index) score++; });
+            try {
+                const fd = new FormData();
+                fd.append('quiz_id', currentQuiz.id);
+                fd.append('score', score);
+                await api('/api/quiz/submit', { method: 'POST', body: fd });
+            } catch (e) { console.error(e); }
+            renderQuizResults(score);
+            if (activeCurriculumId) setTimeout(() => openCurriculum(activeCurriculumId), 100);
+        }
+
+        function renderQuizResults(score) {
+            const total = currentQuiz.questions.length;
+            const pct = Math.round(score / total * 100);
+            const verdict = pct >= 80 ? 'Excellent' : pct >= 60 ? 'Good job' : pct >= 40 ? 'Keep practicing' : 'Try again';
+            const body = document.getElementById('quiz-body');
+            body.innerHTML = `
+                <div class="text-center py-8 mb-6" style="border-bottom: 1px solid var(--border)">
+                    <div class="text-4xl md:text-5xl font-semibold tracking-tight mb-2">${score}<span style="color: var(--text-faint)">/${total}</span></div>
+                    <div class="text-sm font-medium" style="color: var(--text-muted)">${pct}% · ${verdict}</div>
+                </div>`;
+            currentQuiz.questions.forEach((q, qi) => {
+                const userAns = currentAnswers[qi];
+                const correct = q.correct_index;
+                const isCorrect = userAns === correct;
+                const optsHtml = q.options.map((opt, oi) => {
+                    let style = 'border: 1px solid var(--border); background: var(--surface);';
+                    let badge = '';
+                    if (oi === correct) { style = 'border: 1px solid rgba(16,185,129,0.4); background: rgba(16,185,129,0.06);'; badge = '<span class="ml-2 text-[10px] font-semibold" style="color: #059669;">correct</span>'; }
+                    else if (oi === userAns) { style = 'border: 1px solid rgba(239,68,68,0.4); background: rgba(239,68,68,0.06);'; badge = '<span class="ml-2 text-[10px] font-semibold" style="color: #DC2626;">your answer</span>'; }
+                    return `<div class="p-2.5 rounded-lg text-xs" style="${style}">${escapeHtml(opt)}${badge}</div>`;
+                }).join('');
+                body.innerHTML += `
+                    <div class="mb-5">
+                        <div class="font-semibold text-sm mb-2 flex items-start gap-2">
+                            <span style="color: var(--text-faint)">${qi+1}.</span>
+                            <span class="flex-1">${escapeHtml(q.question)}</span>
+                            <span style="color: ${isCorrect ? '#059669' : '#DC2626'}">${isCorrect ? '✓' : '✗'}</span>
+                        </div>
+                        <div class="space-y-1.5 mb-2">${optsHtml}</div>
+                        ${q.explanation ? `<p class="text-[11px] mt-2 px-3 py-2 rounded-lg" style="color: var(--text-muted); background: var(--surface-2);">${escapeHtml(q.explanation)}</p>` : ''}
+                    </div>`;
+            });
+
+            const btn = document.getElementById('quiz-action-btn');
+            btn.innerText = 'Close';
+            btn.onclick = () => quizModal.classList.add('hidden');
+            document.getElementById('quiz-progress').innerText = `Final: ${score}/${total}`;
+        }
+
+        // =============================================================
+        //  DOUBTS PANEL
+        // =============================================================
+        const doubtsPanel = document.getElementById('doubts-panel');
+        document.getElementById('doubts-fab').addEventListener('click', openDoubts);
+        document.getElementById('open-doubts-btn').addEventListener('click', openDoubts);
+        document.getElementById('close-doubts-btn').addEventListener('click', () => doubtsPanel.classList.add('translate-x-full'));
+
+        async function openDoubts() {
+            doubtsPanel.classList.remove('translate-x-full');
+            try {
+                const data = await api(`/api/doubts${activeCurriculumId ? '?curriculum_id=' + activeCurriculumId : ''}`);
+                renderDoubts(data.doubts);
+                setTimeout(() => document.getElementById('doubt-input')?.focus(), 250);
+            } catch (e) {
+                console.error(e);
+                showToast('Failed to load doubts: ' + (e.message || 'unknown'), 'error');
+            }
+        }
+
+        function openDoubtsForModule(curriculumId, moduleDay) {
+            activeCurriculumId = curriculumId;
+            activeModuleDay = moduleDay;
+            openDoubts();
+        }
+
+        // FAB / nav opens doubts WITHOUT pinning to a previous module
+        document.getElementById('doubts-fab').addEventListener('click', () => { activeModuleDay = null; });
+        document.getElementById('open-doubts-btn').addEventListener('click', () => { activeModuleDay = null; });
+
+        function renderDoubts(doubts) {
+            const wrap = document.getElementById('doubts-history');
+            if (!doubts || doubts.length === 0) {
+                wrap.innerHTML = `<div class="text-center py-12 text-sm" style="color: var(--text-faint)">No questions yet.<br/>Ask anything about your roadmap.</div>`;
+                return;
+            }
+            wrap.innerHTML = '';
+            doubts.slice().reverse().forEach(d => {
+                wrap.innerHTML += `
+                    <div class="space-y-2">
+                        <div class="ml-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-br-md text-sm leading-relaxed"
+                             style="background: #F97316; color: white;">${escapeHtml(d.question)}</div>
+                        <div class="mr-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed"
+                             style="background: var(--surface-2); border: 1px solid var(--border); white-space: pre-wrap;">${renderAnswerMarkdown(d.answer || '')}</div>
+                    </div>`;
+            });
+            wrap.scrollTop = wrap.scrollHeight;
+        }
+
+        let _doubtPending = 0;
+        document.getElementById('doubt-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('doubt-input');
+            const q = input.value.trim();
+            if (!q) return;
+            const wrap = document.getElementById('doubts-history');
+            const thinkingId = 'thinking-' + (++_doubtPending);
+            const placeholder = document.createElement('div');
+            placeholder.className = 'space-y-2 animate-fade-in-up';
+            placeholder.innerHTML = `
+                <div class="ml-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-br-md text-sm leading-relaxed"
+                     style="background: #F97316; color: white;">${escapeHtml(q)}</div>
+                <div id="${thinkingId}" class="mr-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-md text-sm flex items-center gap-2"
+                     style="background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted);">
+                    <div class="spinner" style="width:12px;height:12px;border-width:1.5px"></div>
+                    Thinking…
+                </div>`;
+            wrap.appendChild(placeholder);
+            wrap.scrollTop = wrap.scrollHeight;
+            input.value = '';
+            try {
+                const fd = new FormData();
+                fd.append('question', q);
+                if (activeCurriculumId) fd.append('curriculum_id', activeCurriculumId);
+                if (activeModuleDay) fd.append('module_day', activeModuleDay);
+                const data = await api('/api/doubt/ask', { method: 'POST', body: fd });
+                const node = document.getElementById(thinkingId);
+                if (node) node.outerHTML = `<div class="mr-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed" style="background: var(--surface-2); border: 1px solid var(--border); white-space: pre-wrap;">${renderAnswerMarkdown(data.answer || '')}</div>`;
+                wrap.scrollTop = wrap.scrollHeight;
+            } catch (err) {
+                const node = document.getElementById(thinkingId);
+                if (node) node.outerHTML = `<div class="mr-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm" style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #DC2626;">${escapeHtml(err.message || 'Could not reach the AI tutor.')}</div>`;
+            }
+        });
+
+        // =============================================================
+        //  GENERATE FORM
+        // =============================================================
         const dropZone = document.getElementById('drop-zone');
         const fileUpload = document.getElementById('file-upload');
-
         dropZone.addEventListener('click', (e) => {
-            if (e.target.id !== 'clear-file') fileUpload.click();
+            if (e.target.closest('#file-preview')) return;
+            fileUpload.click();
         });
         dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-active'); });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-active'));
@@ -402,295 +1347,184 @@
             if (e.dataTransfer.files.length > 0) setFile(e.dataTransfer.files[0]);
         });
         fileUpload.addEventListener('change', (e) => { if (e.target.files.length > 0) setFile(e.target.files[0]); });
-
         function setFile(file) {
             selectedFile = file;
             document.getElementById('file-name').textContent = file.name;
             document.getElementById('file-preview').classList.remove('hidden');
         }
-
         document.getElementById('clear-file').addEventListener('click', (e) => {
             e.stopPropagation();
-            selectedFile = null;
-            fileUpload.value = '';
+            selectedFile = null; fileUpload.value = '';
             document.getElementById('file-preview').classList.add('hidden');
         });
 
-        // --- Character Counter ---
-        document.getElementById('goal').addEventListener('input', (e) => {
+        // Goal input — char count + animated underline
+        const goalInput = document.getElementById('goal');
+        const goalUnderline = document.getElementById('goal-underline');
+        goalInput.addEventListener('input', (e) => {
             document.getElementById('char-count').textContent = `${e.target.value.length}/200`;
         });
+        goalInput.addEventListener('focus', () => goalUnderline.style.width = '100%');
+        goalInput.addEventListener('blur', () => { if (!goalInput.value) goalUnderline.style.width = '0'; });
 
-        // --- Google OAuth Integration ---
-        window.onload = function () {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: '583271943826-l2go9nbmei40at92uohkt3en2iif9c81.apps.googleusercontent.com',
-                scope: 'https://www.googleapis.com/auth/calendar.events',
-                callback: (tokenResponse) => {
-                    if (tokenResponse && tokenResponse.access_token) {
-                        userAccessToken = tokenResponse.access_token;
-                        document.getElementById('auth-status').innerHTML = '✅ Linked';
-                        document.getElementById('auth-status').className = 'text-[10px] md:text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/30 px-3 py-1.5 rounded-full tracking-wider uppercase';
-                        document.getElementById('auth-btn').style.display = 'none';
-                        document.getElementById('reschedule-btn').classList.remove('hidden');
-                        document.getElementById('reset-btn').classList.remove('hidden');
-                    }
-                },
-            });
-
-            // Reschedule
-            document.getElementById('reschedule-btn').addEventListener('click', async () => {
-                if (!userAccessToken) return alert("Please link your calendar first.");
-                const btn = document.getElementById('reschedule-btn');
-                const original = btn.innerText;
-                btn.innerText = "⏳ Scanning...";
-                btn.disabled = true;
-                const formData = new FormData();
-                formData.append('access_token', userAccessToken);
-                try {
-                    const res = await fetch('/api/reschedule', { method: 'POST', body: formData });
-                    const result = await res.json();
-                    alert("✅ " + result.message);
-                } catch (err) {
-                    alert("Failed to reach backend.");
-                } finally {
-                    btn.innerText = original;
-                    btn.disabled = false;
-                }
-            });
-
-            // Reset
-            document.getElementById('reset-btn').addEventListener('click', async () => {
-                if (!confirm("Clear the database for a fresh demo?")) return;
-                const btn = document.getElementById('reset-btn');
-                btn.innerText = "🧹 Clearing...";
-                btn.disabled = true;
-                try {
-                    const res = await fetch('/api/reset', { method: 'POST' });
-                    const result = await res.json();
-                    document.getElementById('results').classList.add('hidden');
-                    document.getElementById('goal').value = '';
-                    document.getElementById('char-count').textContent = '0/200';
-                    selectedFile = null;
-                    fileUpload.value = '';
-                    document.getElementById('file-preview').classList.add('hidden');
-                    alert("✅ " + result.message);
-                } catch (err) {
-                    alert("Failed to reset.");
-                } finally {
-                    btn.innerText = "🔄 Reset";
-                    btn.disabled = false;
-                }
-            });
-        };
-
-        document.getElementById('auth-btn').onclick = () => tokenClient.requestAccessToken({ prompt: 'consent' });
-
-        // --- Tab Management ---
         function switchTab(mode) {
             currentMode = mode;
             const tl = document.getElementById('tab-learning');
             const ti = document.getElementById('tab-interview');
-            
-            const active = "pb-4 font-bold text-brand-orange border-b-2 border-brand-orange transition text-base md:text-lg flex items-center gap-2";
-            const inactive = "pb-4 font-semibold text-slate-500 hover:text-brand-yellow transition text-base md:text-lg flex items-center gap-2";
-            
             if (mode === 'learning') {
-                tl.className = active; ti.className = inactive;
+                tl.classList.add('active'); ti.classList.remove('active');
                 document.getElementById('form-title').innerText = "What do you want to master today?";
-                document.getElementById('goal').placeholder = "e.g., Learn Next.js and Tailwind from scratch...";
+                goalInput.placeholder = "e.g., Learn Next.js and Tailwind from scratch";
             } else {
-                ti.className = active; tl.className = inactive;
+                ti.classList.add('active'); tl.classList.remove('active');
                 document.getElementById('form-title').innerText = "What role are you prepping for?";
-                document.getElementById('goal').placeholder = "e.g., Senior Full Stack Developer Interview...";
+                goalInput.placeholder = "e.g., Senior Full Stack Developer interview";
             }
         }
 
-        // --- Form Submission & API Generation ---
+        let agentTimer = null;
+        function startAgentAnimation() {
+            const cards = document.querySelectorAll('.agent-card');
+            let step = 0;
+            agentTimer = setInterval(() => {
+                cards.forEach((c, i) => {
+                    c.classList.remove('agent-active', 'agent-done');
+                    if (i < step) c.classList.add('agent-done');
+                    else if (i === step) c.classList.add('agent-active');
+                });
+                step = (step + 1) % (cards.length + 1);
+            }, 1600);
+        }
+        function stopAgentAnimation() {
+            if (agentTimer) { clearInterval(agentTimer); agentTimer = null; }
+            document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('agent-active', 'agent-done'));
+        }
+
         document.getElementById('notschool-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const goal = document.getElementById('goal').value.trim();
+            const goal = goalInput.value.trim();
             if (!goal) return;
-
-            // Reset UI
             document.getElementById('error-banner').classList.add('hidden');
+            document.getElementById('generate-success').classList.add('hidden');
             document.getElementById('loading').classList.remove('hidden');
-            document.getElementById('results').classList.add('hidden');
-
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span class="text-white whitespace-nowrap font-bold">Connecting...</span>
-            `;
-            submitBtn.classList.add('cursor-not-allowed', 'opacity-90');
-
+            submitBtn.innerHTML = `<div class="spinner" style="border-color: rgba(255,255,255,0.3); border-top-color: white;"></div><span>Deploying…</span>`;
             startAgentAnimation();
-
-            const formData = new FormData();
-            formData.append('goal', goal);
-            formData.append('mode', currentMode);
-            if (userAccessToken) formData.append('access_token', userAccessToken);
-            if (selectedFile) formData.append('image', selectedFile);
-
+            const fd = new FormData();
+            fd.append('goal', goal);
+            fd.append('mode', currentMode);
+            if (selectedFile) fd.append('image', selectedFile);
             try {
-                const response = await fetch('/api/generate', { method: 'POST', body: formData });
-
-                if (!response.ok) {
-                    let errDetail = `Server error ${response.status}`;
-                    try { const errJson = await response.json(); errDetail = errJson.detail || errDetail; } catch {}
-                    throw new Error(errDetail);
-                }
-
-                const result = await response.json();
-                const data = result.data;
-                const curr = data.curriculum_json;
-
+                const data = await api('/api/generate', { method: 'POST', body: fd });
+                lastGeneratedCurriculumId = data.data.curriculum_id;
                 stopAgentAnimation();
-                renderResults(data, curr);
-
-            } catch (error) {
-                showError(error.message || 'Failed to generate curriculum. Check your API keys and backend connection.');
-                console.error(error);
+                document.getElementById('generate-success').classList.remove('hidden');
+                document.getElementById('goto-detail-btn').onclick = () => { if (lastGeneratedCurriculumId) openCurriculum(lastGeneratedCurriculumId); };
+                goalInput.value = '';
+                document.getElementById('char-count').textContent = '0/200';
+                goalUnderline.style.width = '0';
+                selectedFile = null;
+                fileUpload.value = '';
+                document.getElementById('file-preview').classList.add('hidden');
+            } catch (err) {
+                document.getElementById('error-msg').textContent = err.message || 'Something went wrong.';
+                document.getElementById('error-banner').classList.remove('hidden');
             } finally {
                 document.getElementById('loading').classList.add('hidden');
                 submitBtn.disabled = false;
-                submitBtn.classList.remove('cursor-not-allowed', 'opacity-90');
-                submitBtn.innerHTML = `
-                    <div class="absolute inset-0 bg-gradient-to-r from-brand-yellow via-brand-orange to-brand-red opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
-                    <span class="relative z-10 whitespace-nowrap">Deploy Agents</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 relative z-10 text-brand-yellow group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                `;
+                submitBtn.innerHTML = `<span>Deploy agents</span><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 12h15"/></svg>`;
                 stopAgentAnimation();
             }
         });
 
-        // --- Render Results to Screen ---
-        async function renderResults(data, curr) {
-            // Title
-            if (curr && curr.title) {
-                document.getElementById('plan-title').innerText = curr.title;
-            }
-
-            // 1. Mermaid Graph (Mermaid v10+ API)
-            let mermaidDef = "graph TD;\n";
-            if (curr && curr.modules && curr.modules.length > 0) {
-                let prev = null;
-                curr.modules.forEach((mod, i) => {
-                    const id = `N${i}`;
-                    const safe = (mod.topic || 'Module').replace(/[^a-zA-Z0-9 \-]/g, "").trim();
-                    const hrs = mod.duration_hours || 1;
-                    mermaidDef += `  ${id}["📅 Day ${mod.day || i + 1}: ${safe}\n⏱ ${hrs}h"];\n`;
-                    if (prev) mermaidDef += `  ${prev} --> ${id};\n`;
-                    prev = id;
-                });
-            } else {
-                mermaidDef += "  Start[\"🚀 Start\"] --> End[\"🎯 Finish\"];\n";
-            }
-
-            const mermaidContainer = document.getElementById('mermaid-output');
-            mermaidContainer.innerHTML = '';
+        // =============================================================
+        //  AUTO-RESCHEDULE
+        // =============================================================
+        let _autoRescheduleRan = false;
+        async function maybeAutoReschedule() {
+            if (_autoRescheduleRan) return;
+            _autoRescheduleRan = true;
             try {
-                const uniqueId = 'mg-' + Date.now();
-                const { svg } = await mermaid.render(uniqueId, mermaidDef);
-                mermaidContainer.innerHTML = svg;
-            } catch (err) {
-                console.error("Mermaid render error:", err);
-                mermaidContainer.innerHTML = `<p class="text-slate-500 text-sm">Graph rendering unavailable</p>`;
+                const data = await api('/api/reschedule', { method: 'POST', body: new FormData() });
+                const msg = data.message || '';
+                if (/rescheduled\s+([1-9]\d*)/i.test(msg)) {
+                    showToast(msg);
+                    loadDashboard();
+                }
+            } catch (e) { console.warn('Auto-reschedule skipped:', e.message); }
+        }
+
+        // =============================================================
+        //  TOAST
+        // =============================================================
+        function showToast(message, kind = 'success') {
+            let host = document.getElementById('toast-host');
+            if (!host) {
+                host = document.createElement('div');
+                host.id = 'toast-host';
+                host.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 items-center pointer-events-none';
+                document.body.appendChild(host);
             }
-
-            // 2. YouTube Videos
-            const ytList = document.getElementById('youtube-output');
-            ytList.innerHTML = '';
-            if (data.youtube_urls && data.youtube_urls.length > 0) {
-                data.youtube_urls.forEach((url, i) => {
-                    const videoId = url.split('v=')[1] || '';
-                    const thumb = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
-                    ytList.innerHTML += `
-                    <li class="group cursor-pointer" onclick="window.open('${url}','_blank')">
-                        <a class="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-800 hover:border-brand-orange/50 transition-all duration-300 shadow-sm hover:shadow-md">
-                            ${thumb ? 
-                                `<img src="${thumb}" class="w-24 h-16 object-cover rounded-xl flex-shrink-0 bg-slate-200 dark:bg-slate-800" onerror="this.style.display='none'">` : 
-                                `<div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-200 dark:bg-slate-950 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold group-hover:bg-brand-orange group-hover:text-white transition-colors text-xs md:text-sm"><svg class="w-4 h-4 md:w-5 md:h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`
-                            }
-                            <div class="flex-1 min-w-0">
-                                <div class="text-slate-900 dark:text-white font-bold text-xs md:text-sm truncate group-hover:text-brand-orange transition-colors">Video Resource ${i+1}</div>
-                                <div class="text-slate-500 text-[10px] md:text-xs mt-0.5 md:mt-1 truncate">${url}</div>
-                            </div>
-                        </a>
-                    </li>`;
-                });
-            } else {
-                ytList.innerHTML = '<li class="text-slate-500 text-xs md:text-sm italic p-4 text-center border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl">No precise video matches found.</li>';
+            const el = document.createElement('div');
+            el.className = `toast animate-fade-in-up pointer-events-auto`;
+            if (kind === 'error') {
+                el.style.background = '#EF4444';
+                el.style.color = 'white';
             }
+            el.textContent = message;
+            host.appendChild(el);
+            setTimeout(() => { el.style.transition = 'opacity .3s, transform .3s'; el.style.opacity = '0'; el.style.transform = 'translateY(8px)'; }, 3500);
+            setTimeout(() => el.remove(), 3900);
+        }
 
-            // 3. Trends
-            const trendsContainer = document.getElementById('trends-container');
-            const trendsList = document.getElementById('trends-output');
-            trendsList.innerHTML = '';
-            let allTrends = [];
-            if (data.web_trends) allTrends = allTrends.concat(data.web_trends);
-            if (curr && curr.trends) allTrends = allTrends.concat(curr.trends);
-            if (allTrends.length > 0) {
-                trendsContainer.classList.remove('hidden');
-                [...new Set(allTrends)].slice(0, 10).forEach(t => {
-                    trendsList.innerHTML += `<span class="bg-brand-orange/10 text-brand-orange border border-brand-orange/20 px-3 py-1.5 rounded-xl text-xs font-bold">${t}</span>`;
-                });
-            } else { trendsContainer.classList.add('hidden'); }
+        // =============================================================
+        //  UTIL
+        // =============================================================
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
 
-            // 4. Certifications
-            const certsContainer = document.getElementById('certs-container');
-            const certsList = document.getElementById('certs-output');
-            certsList.innerHTML = '';
-            if (curr && curr.certifications && curr.certifications.length > 0) {
-                certsContainer.classList.remove('hidden');
-                curr.certifications.forEach(c => {
-                    certsList.innerHTML += `
-                    <div class="flex items-center gap-3 bg-brand-yellow/10 border border-brand-yellow/20 text-yellow-600 dark:text-brand-yellow px-4 py-3 rounded-xl text-xs md:text-sm font-bold">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        ${c}
-                    </div>`;
-                });
-            } else { certsContainer.classList.add('hidden'); }
-
-            // 5. Module Table
-            const modulesContainer = document.getElementById('modules-container');
-            const modulesOutput = document.getElementById('modules-output');
-            modulesOutput.innerHTML = '';
-            if (curr && curr.modules && curr.modules.length > 0) {
-                modulesContainer.classList.remove('hidden');
-                curr.modules.forEach((mod, i) => {
-                    modulesOutput.innerHTML += `
-                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                        <td class="px-6 py-4 font-bold text-brand-orange text-center whitespace-nowrap">
-                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-xs">${mod.day || i+1}</span>
-                        </td>
-                        <td class="px-6 py-4 font-bold text-slate-800 dark:text-white text-sm whitespace-nowrap">${mod.topic || '—'}</td>
-                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-xs md:text-sm max-w-sm">${mod.description || '—'}</td>
-                        <td class="px-6 py-4 text-right whitespace-nowrap">
-                            <span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-bold border border-slate-200 dark:border-slate-700">${mod.duration_hours || 1}h</span>
-                        </td>
-                    </tr>`;
-                });
-            } else { modulesContainer.classList.add('hidden'); }
-
-            // 6. Calendar Event
-            const calContainer = document.getElementById('calendar-container');
-            if (data.calendar_event_id && data.calendar_event_id !== "No Link") {
-                document.getElementById('calendar-link').href = data.calendar_event_id;
-                calContainer.classList.remove('hidden');
-            } else {
-                calContainer.classList.add('hidden');
-            }
-
-            document.getElementById('results').classList.remove('hidden');
-            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Lightweight, safe markdown for AI answers.
+        // Supports: ```fenced code```, `inline code`, **bold**. Everything else is escaped.
+        function renderAnswerMarkdown(s) {
+            if (s == null) return '';
+            const codeBlockStyle = 'background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.625rem 0.75rem; font-family: \'JetBrains Mono\', monospace; font-size: 0.75rem; white-space: pre-wrap; overflow-x: auto; margin: 0.5rem 0;';
+            const inlineCodeStyle = 'background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.3rem; font-family: \'JetBrains Mono\', monospace; font-size: 0.78em;';
+            const blocks = [];
+            let text = String(s).replace(/```(\w+)?\n?([\s\S]*?)```/g, (_, _lang, code) => {
+                blocks.push(`<pre style="${codeBlockStyle}">${escapeHtml(code.replace(/\n+$/,''))}</pre>`);
+                return ` BLOCK${blocks.length - 1} `;
+            });
+            text = escapeHtml(text);
+            text = text.replace(/`([^`\n]+)`/g, (_, c) => `<code style="${inlineCodeStyle}">${c}</code>`);
+            text = text.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/ BLOCK(\d+) /g, (_, i) => blocks[Number(i)]);
+            return text;
+        }
+        function escapeJs(s) {
+            return String(s || '')
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '\\x3C')
+                .replace(/[\r\n]/g, ' ');
+        }
+        function safeUrl(u) {
+            const s = String(u || '').trim();
+            if (!/^https?:\/\//i.test(s)) return '';
+            return s.replace(/"/g, '%22').replace(/</g, '%3C').replace(/>/g, '%3E');
+        }
+        function parseUtcDate(s) {
+            if (!s) return new Date(NaN);
+            return new Date(String(s).replace(' ', 'T') + 'Z');
+        }
+        function formatDate(s) {
+            if (!s) return '';
+            const d = new Date(s.replace(' ', 'T'));
+            if (isNaN(d)) return s;
+            return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
         }
     </script>
 </body>
