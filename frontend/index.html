@@ -11,7 +11,6 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -65,21 +64,6 @@
                 }
             }
         }
-    </script>
-
-    <script>
-        mermaid.initialize({
-            startOnLoad: false, theme: 'base',
-            themeVariables: {
-                fontFamily: 'Inter, sans-serif',
-                primaryColor: 'transparent',
-                primaryTextColor: '#F97316',
-                primaryBorderColor: '#F97316',
-                lineColor: '#71717A',
-                secondaryColor: 'transparent',
-                tertiaryColor: 'transparent'
-            }
-        });
     </script>
 
     <style>
@@ -288,17 +272,239 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Mermaid styling tweaks */
-        #detail-mermaid svg { max-width: 100%; height: auto; }
-        #detail-mermaid .node rect, #detail-mermaid .node polygon {
-            fill: var(--surface) !important;
-            stroke: var(--border-strong) !important;
-            stroke-width: 1px !important;
+        /* Roadmap journey chart — bespoke timeline visualisation */
+        .roadmap-chart {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            width: 100%;
+            padding: 0.25rem 0.5rem;
         }
-        #detail-mermaid .node:hover rect { stroke: #F97316 !important; }
-        #detail-mermaid .edgePath path { stroke: var(--text-faint) !important; stroke-width: 1.2px !important; }
-        #detail-mermaid .marker { fill: var(--text-faint) !important; stroke: var(--text-faint) !important; }
-        #detail-mermaid .nodeLabel { color: var(--text) !important; font-family: Inter, sans-serif !important; }
+        .roadmap-step {
+            position: relative;
+            display: grid;
+            grid-template-columns: 56px 1fr;
+            gap: 1.25rem;
+            padding: 0.625rem 0;
+            align-items: stretch;
+            animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .roadmap-step::before {
+            content: '';
+            position: absolute;
+            left: 27px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--border) 0%, var(--border-strong) 50%, var(--border) 100%);
+            z-index: 0;
+        }
+        .roadmap-step:first-child::before { top: 32px; }
+        .roadmap-step:last-child::before  { bottom: calc(100% - 32px); }
+        .roadmap-step.done::before {
+            background: linear-gradient(to bottom, rgba(16,185,129,0.5), rgba(16,185,129,0.2));
+        }
+        .roadmap-day-circle {
+            position: relative;
+            z-index: 1;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 2px solid var(--border-strong);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-muted);
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            box-shadow: 0 0 0 4px var(--surface);
+        }
+        .roadmap-day-circle .day-num {
+            font-size: 18px;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+        .roadmap-day-circle .day-label {
+            font-size: 8px;
+            line-height: 1;
+            margin-top: 2px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--text-faint);
+            text-transform: uppercase;
+        }
+        .roadmap-step.done .roadmap-day-circle {
+            background: rgba(16,185,129,0.12);
+            border-color: #10B981;
+            color: #059669;
+        }
+        .roadmap-step.active .roadmap-day-circle {
+            background: rgba(249,115,22,0.12);
+            border-color: #F97316;
+            color: #F97316;
+            box-shadow: 0 0 0 4px var(--surface), 0 0 0 8px rgba(249,115,22,0.18);
+            animation: roadmapPulse 2.2s ease-in-out infinite;
+        }
+        .roadmap-step.overdue .roadmap-day-circle {
+            background: rgba(239,68,68,0.10);
+            border-color: rgba(239,68,68,0.55);
+            color: #DC2626;
+        }
+        @keyframes roadmapPulse {
+            0%, 100% { box-shadow: 0 0 0 4px var(--surface), 0 0 0 8px rgba(249,115,22,0.18); }
+            50%      { box-shadow: 0 0 0 4px var(--surface), 0 0 0 12px rgba(249,115,22,0.28); }
+        }
+        .roadmap-card {
+            position: relative;
+            z-index: 1;
+            padding: 0.875rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+            cursor: default;
+        }
+        .roadmap-card:hover {
+            border-color: var(--border-strong);
+            transform: translateX(2px);
+        }
+        .roadmap-step.active .roadmap-card { border-color: rgba(249,115,22,0.4); }
+        .roadmap-step.done .roadmap-card { background: linear-gradient(135deg, var(--surface), rgba(16,185,129,0.04)); }
+        .roadmap-card-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .roadmap-topic {
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 1.3;
+            color: var(--text);
+            letter-spacing: -0.01em;
+        }
+        /* roadmap-desc visibility lives further down — kept as a hover-only reveal */
+        .roadmap-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-faint);
+            flex-shrink: 0;
+        }
+        .roadmap-meta .dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.4; }
+
+        /* Profile modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: color-mix(in srgb, var(--bg) 65%, transparent);
+            backdrop-filter: blur(10px);
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.25s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .tag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(249,115,22,0.1);
+            color: #F97316;
+            border: 1px solid rgba(249,115,22,0.25);
+            font-size: 11px;
+            font-weight: 500;
+            animation: scaleIn 0.18s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .tag-chip button {
+            opacity: 0.6;
+            transition: opacity 0.15s;
+        }
+        .tag-chip button:hover { opacity: 1; }
+        .tag-input-wrap {
+            min-height: 44px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            padding: 8px 10px;
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            background: var(--surface);
+            transition: border-color 0.2s;
+        }
+        .tag-input-wrap:focus-within { border-color: #F97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.15); }
+        .tag-input-wrap input {
+            flex: 1;
+            min-width: 100px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        /* AI tutor backdrop overlay */
+        .doubts-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(2px);
+            z-index: 39;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .doubts-backdrop.show { opacity: 1; pointer-events: auto; }
+
+        /* Profile menu dropdown */
+        .menu-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border-strong);
+            border-radius: 12px;
+            box-shadow: 0 12px 32px -12px rgba(0,0,0,0.18);
+            padding: 6px;
+            z-index: 30;
+            animation: scaleIn 0.18s cubic-bezier(0.16,1,0.3,1) both;
+            transform-origin: top right;
+        }
+        .dark .menu-dropdown { box-shadow: 0 12px 32px -12px rgba(0,0,0,0.6); }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            text-align: left;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .menu-item:hover { background: var(--surface-2); }
+        .menu-item.danger { color: #DC2626; }
+        .menu-item.danger:hover { background: rgba(239,68,68,0.06); }
+        .menu-divider { height: 1px; background: var(--border); margin: 4px 0; }
 
         /* Misc */
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -369,6 +575,88 @@
             border-radius: 6px;
         }
 
+        /* Timeframe selector segmented control */
+        .tf-btn {
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .tf-btn:hover { color: var(--text); }
+        .tf-btn.active {
+            background: #F97316;
+            color: white;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset;
+        }
+
+        /* Roadmap card description — hidden by default, revealed on hover/focus
+           so the timeline reads cleanly at a glance and the detail is one
+           hover away. The peek pattern keeps overdue/up-next badges visible
+           without crowding the row. */
+        .roadmap-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.5;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transform: translateY(-2px);
+            transition: max-height 0.35s cubic-bezier(0.16,1,0.3,1),
+                        opacity 0.25s ease,
+                        margin-top 0.25s ease,
+                        transform 0.25s ease;
+        }
+        .roadmap-step:hover .roadmap-desc,
+        .roadmap-step:focus-within .roadmap-desc {
+            max-height: 200px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .roadmap-step .roadmap-card { cursor: default; }
+        .roadmap-card-hint {
+            font-size: 10px;
+            margin-top: 4px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-faint);
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+        .roadmap-step:hover .roadmap-card-hint,
+        .roadmap-step:focus-within .roadmap-card-hint {
+            opacity: 0;
+        }
+
+        /* Cadence pill on detail header */
+        .cadence-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #F97316;
+            background: rgba(249,115,22,0.08);
+            border: 1px solid rgba(249,115,22,0.22);
+            border-radius: 999px;
+            padding: 3px 8px;
+        }
+
+        /* Locked mark-done state — the next module isn't unlocked until the
+           previous one is completed. */
+        .btn-locked {
+            background: var(--surface-2);
+            color: var(--text-faint);
+            border: 1px dashed var(--border-strong);
+            cursor: not-allowed;
+        }
+        .btn-locked:hover { background: var(--surface-2); }
+
         /* Toast */
         .toast {
             background: var(--text);
@@ -388,8 +676,11 @@
     <!-- Soft accent vignette -->
     <div class="fixed inset-0 z-0 pointer-events-none" style="background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(249,115,22,0.08), transparent 60%);"></div>
 
-    <!-- Theme toggle -->
-    <div class="fixed top-5 right-5 md:top-6 md:right-6 z-50">
+    <!-- Theme toggle (rendered when logged out — sits in the top-right next
+         to the empty header. When the user logs in we move the same button
+         inline next to the user-chip so it never overlaps the back button or
+         the profile chip on the detail view.) -->
+    <div id="theme-toggle-wrap" class="fixed top-5 right-5 md:top-6 md:right-6 z-50">
         <button id="themeToggle" aria-label="Toggle theme"
             class="w-9 h-9 rounded-full card flex items-center justify-center hover:border-[var(--border-strong)] transition">
             <svg id="sunIcon" class="hidden w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5m0 15V21m9-9h-1.5M4.5 12H3m15.364 6.364l-1.06-1.06M6.696 6.696l-1.06-1.06m12.728 0l-1.06 1.06M6.696 17.304l-1.06 1.06M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -422,14 +713,38 @@
                     <div class="text-[10px] tracking-[0.18em] uppercase mt-1" style="color: var(--text-faint)">Ditch the classroom</div>
                 </div>
             </div>
-            <div id="user-chip" class="hidden items-center gap-2 pl-1 pr-1 py-1 rounded-full" style="background: var(--surface); border: 1px solid var(--border);">
-                <img id="user-pic" class="w-6 h-6 rounded-full" alt="" />
-                <span id="user-name" class="text-xs font-medium hidden md:inline pl-1" style="color: var(--text-muted)"></span>
-                <button id="logout-btn" title="Sign out" aria-label="Sign out"
-                        class="w-6 h-6 rounded-full flex items-center justify-center ml-1 transition"
-                        style="color: var(--text-muted); background: transparent;">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            <div id="header-actions" class="flex items-center gap-2">
+                <!-- Theme toggle docks here once the user is signed in -->
+                <div id="theme-toggle-slot"></div>
+            <div id="user-chip" class="hidden relative inline-block">
+                <button id="user-chip-btn" class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full transition"
+                        style="background: var(--surface); border: 1px solid var(--border);"
+                        aria-label="Open profile menu" aria-haspopup="true" aria-expanded="false">
+                    <img id="user-pic" class="w-6 h-6 rounded-full" alt="" />
+                    <span id="user-name" class="text-xs font-medium hidden md:inline pl-1" style="color: var(--text-muted)"></span>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color: var(--text-faint)"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </button>
+                <div id="user-menu" class="menu-dropdown hidden">
+                    <div class="px-2 py-1.5">
+                        <div id="menu-name" class="text-xs font-semibold truncate" style="color: var(--text);">—</div>
+                        <div id="menu-email" class="text-[10px] truncate" style="color: var(--text-faint);">—</div>
+                    </div>
+                    <div class="menu-divider"></div>
+                    <button id="open-profile-btn" class="menu-item">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        Edit profile
+                    </button>
+                    <button id="menu-dashboard-btn" class="menu-item">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        Dashboard
+                    </button>
+                    <div class="menu-divider"></div>
+                    <button id="logout-btn" class="menu-item danger">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        Sign out
+                    </button>
+                </div>
+            </div>
             </div>
         </div>
 
@@ -452,11 +767,6 @@
                 <p class="text-sm" style="color: var(--text-muted)">Tell us what you want to learn. We'll architect it.</p>
             </div>
 
-            <div class="flex gap-7 mb-8" style="border-bottom: 1px solid var(--border)">
-                <button id="tab-learning" onclick="switchTab('learning')" class="tab active">Learning</button>
-                <button id="tab-interview" onclick="switchTab('interview')" class="tab">Interview prep</button>
-            </div>
-
             <div class="card p-7 md:p-9 mb-8">
                 <form id="notschool-form" class="space-y-8">
                     <div>
@@ -469,6 +779,29 @@
                                 class="input-bare text-xl md:text-2xl font-medium pr-16">
                             <span id="char-count" class="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] font-mono" style="color: var(--text-faint)">0/200</span>
                             <div class="absolute -bottom-px left-0 h-px bg-accent w-0 transition-all duration-500" id="goal-underline"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-semibold tracking-[0.18em] uppercase mb-3 block" style="color: var(--text-muted)">
+                            Cadence
+                        </label>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl" style="background: var(--surface-2); border: 1px solid var(--border);">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs" style="color: var(--text-muted)">One module every</span>
+                                <input type="number" id="timeframe-amount" min="1" max="30" value="1"
+                                       class="w-16 px-2 py-1.5 rounded-lg text-sm font-semibold text-center"
+                                       style="background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); outline: none;" />
+                                <div id="timeframe-unit-group" class="flex p-0.5 rounded-lg" style="background: var(--surface); border: 1px solid var(--border-strong);">
+                                    <button type="button" data-tf="min"  class="tf-btn px-2.5 py-1 text-[11px] font-semibold rounded-md">min</button>
+                                    <button type="button" data-tf="hour" class="tf-btn px-2.5 py-1 text-[11px] font-semibold rounded-md">hour</button>
+                                    <button type="button" data-tf="day"  class="tf-btn px-2.5 py-1 text-[11px] font-semibold rounded-md">day</button>
+                                    <button type="button" data-tf="week" class="tf-btn px-2.5 py-1 text-[11px] font-semibold rounded-md">week</button>
+                                </div>
+                            </div>
+                            <p id="timeframe-help" class="text-[11px] sm:ml-auto" style="color: var(--text-faint)">
+                                One module per day · 7-day total
+                            </p>
                         </div>
                     </div>
 
@@ -555,7 +888,7 @@
         <section id="dashboard-view" class="hidden view">
             <div class="mb-8 flex items-end justify-between flex-wrap gap-4">
                 <div>
-                    <h2 class="text-3xl md:text-4xl font-semibold tracking-tight mb-2">Dashboard</h2>
+                    <h2 id="dashboard-greeting" class="text-3xl md:text-4xl font-semibold tracking-tight mb-2">Dashboard</h2>
                     <p class="text-sm" style="color: var(--text-muted)">Your learning overview.</p>
                 </div>
                 <button onclick="showView('generate')" class="btn btn-primary">
@@ -564,7 +897,9 @@
                 </button>
             </div>
 
-            <div id="dashboard-stats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10"></div>
+            <div id="dashboard-stats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"></div>
+
+            <div id="dashboard-next" class="hidden card p-5 mb-10" style="border-color: rgba(249,115,22,0.3); background: rgba(249,115,22,0.04);"></div>
 
             <div class="flex justify-between items-baseline mb-5">
                 <h3 class="text-sm font-semibold tracking-wide">Roadmaps</h3>
@@ -598,6 +933,10 @@
                     </div>
                     <div class="flex items-center gap-2 flex-shrink-0">
                         <div id="detail-progress" class="text-xs font-medium px-3 py-1.5 rounded-lg" style="background: var(--surface-2); color: var(--text-muted)"></div>
+                        <button id="export-curriculum-btn" class="btn btn-secondary text-xs h-9 px-3" title="Download as JSON">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Export
+                        </button>
                         <button id="delete-curriculum-btn" class="btn btn-danger-ghost text-xs h-9 px-3">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             Delete
@@ -605,19 +944,49 @@
                     </div>
                 </div>
 
-                <div class="rounded-xl p-5 overflow-x-auto flex justify-center min-h-[160px] items-center" style="background: var(--surface-2); border: 1px solid var(--border)">
-                    <div id="detail-mermaid"></div>
+                <div class="rounded-xl p-5 overflow-x-auto" style="background: var(--surface-2); border: 1px solid var(--border)">
+                    <div id="detail-roadmap"></div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div id="detail-trends" class="hidden card p-5">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-1 h-4 rounded-full bg-accent"></div>
-                        <h4 class="text-[10px] font-semibold tracking-[0.18em] uppercase" style="color: var(--text-muted)">Industry trends</h4>
+            <div id="detail-quiz-progress" class="hidden card p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-1 h-4 rounded-full" style="background: #8B5CF6"></div>
+                        <h4 class="text-[10px] font-semibold tracking-[0.18em] uppercase" style="color: var(--text-muted)">Quiz progress</h4>
                     </div>
-                    <div id="detail-trends-out" class="flex flex-wrap gap-1.5"></div>
+                    <div id="detail-quiz-summary" class="text-xs font-medium" style="color: var(--text-muted)"></div>
                 </div>
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="text-center p-3 rounded-xl" style="background: var(--surface-2);">
+                        <div id="detail-quiz-attempted" class="text-2xl font-semibold tracking-tight">0</div>
+                        <div class="text-[10px] tracking-wider uppercase mt-1" style="color: var(--text-muted)">Attempted</div>
+                    </div>
+                    <div class="text-center p-3 rounded-xl" style="background: var(--surface-2);">
+                        <div id="detail-quiz-points" class="text-2xl font-semibold tracking-tight">0</div>
+                        <div class="text-[10px] tracking-wider uppercase mt-1" style="color: var(--text-muted)">Points</div>
+                    </div>
+                    <div class="text-center p-3 rounded-xl" style="background: var(--surface-2);">
+                        <div id="detail-quiz-accuracy" class="text-2xl font-semibold tracking-tight" style="color:#8B5CF6">0%</div>
+                        <div class="text-[10px] tracking-wider uppercase mt-1" style="color: var(--text-muted)">Accuracy</div>
+                    </div>
+                </div>
+                <div class="progress-track" style="height: 6px; background: rgba(139,92,246,0.12);">
+                    <div id="detail-quiz-bar" class="progress-fill" style="width: 0%; background: #8B5CF6;"></div>
+                </div>
+                <div id="detail-quiz-cells" class="flex gap-1 mt-4 flex-wrap"></div>
+            </div>
+
+            <!-- Planner moved ABOVE initiatives so users see their schedule first -->
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-1 h-5 rounded-full bg-accent"></div>
+                    <h3 class="text-base font-semibold">Planner</h3>
+                </div>
+                <div id="modules-planner" class="space-y-3"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div id="detail-certs" class="hidden card p-5">
                     <div class="flex items-center gap-2 mb-3">
                         <div class="w-1 h-4 rounded-full" style="background: #EAB308"></div>
@@ -626,19 +995,17 @@
                     <div id="detail-certs-out" class="flex flex-col gap-1.5"></div>
                 </div>
                 <div id="detail-opps" class="hidden card p-5 lg:col-span-2">
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-1 h-4 rounded-full" style="background: #10B981"></div>
-                        <h4 class="text-[10px] font-semibold tracking-[0.18em] uppercase" style="color: var(--text-muted)">Industry opportunities</h4>
+                    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-4 rounded-full" style="background: #10B981"></div>
+                            <h4 class="text-[10px] font-semibold tracking-[0.18em] uppercase" style="color: var(--text-muted)">Industry Initiatives</h4>
+                            <span class="pill" style="background: rgba(16,185,129,0.08); color:#059669; border-color: rgba(16,185,129,0.2);">2026 cohorts</span>
+                        </div>
+                        <div id="opps-filter" class="flex items-center gap-1 text-[11px]"></div>
                     </div>
                     <div id="detail-opps-out" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
                 </div>
             </div>
-
-            <div class="flex items-center gap-2 mt-8 mb-3">
-                <div class="w-1 h-5 rounded-full bg-accent"></div>
-                <h3 class="text-base font-semibold">Planner</h3>
-            </div>
-            <div id="modules-planner" class="space-y-3"></div>
         </section>
     </header>
 
@@ -647,29 +1014,126 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
     </button>
 
-    <!-- DOUBTS PANEL -->
-    <aside id="doubts-panel" class="doubts-panel fixed inset-y-0 right-0 z-40 w-full md:w-[420px] flex flex-col translate-x-full"
+    <!-- AI TUTOR backdrop (click to close) -->
+    <div id="doubts-backdrop" class="doubts-backdrop"></div>
+
+    <!-- AI TUTOR PANEL (multi-chat) -->
+    <aside id="doubts-panel" class="doubts-panel fixed inset-y-0 right-0 z-40 w-full md:w-[680px] flex flex-col translate-x-full"
         style="background: var(--surface); border-left: 1px solid var(--border); box-shadow: -20px 0 50px -20px rgba(0,0,0,0.15);">
-        <div class="p-5 flex items-center justify-between" style="border-bottom: 1px solid var(--border)">
-            <div>
-                <h3 class="font-semibold text-base">Ask a doubt</h3>
-                <p class="text-[10px] tracking-[0.18em] uppercase mt-0.5" style="color: var(--text-faint)">Your AI tutor</p>
+        <div class="p-4 flex items-center justify-between" style="border-bottom: 1px solid var(--border)">
+            <div class="flex items-center gap-2">
+                <button id="chats-toggle-btn" class="md:hidden w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--surface-2)] transition" title="Show chats">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <div>
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                        AI Tutor
+                        <span class="pill pill-accent" style="font-size: 9px;">Context-aware</span>
+                    </h3>
+                    <p class="text-[10px] tracking-[0.18em] uppercase mt-0.5" style="color: var(--text-faint)">Multi-turn · Saved chats</p>
+                </div>
             </div>
-            <button id="close-doubts-btn" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--surface-2)] transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-        <div id="doubts-history" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
-        <form id="doubt-form" class="p-4" style="border-top: 1px solid var(--border); background: var(--surface-2)">
-            <div class="flex gap-2 items-center card p-1.5" style="border-radius: 12px;">
-                <input type="text" id="doubt-input" placeholder="Ask anything about your roadmap…"
-                    class="input-bare flex-1 px-3 py-1.5 text-sm" required>
-                <button type="submit" class="btn btn-primary h-8 px-3 text-xs">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+            <div class="flex items-center gap-1">
+                <button id="new-chat-btn" class="btn btn-secondary text-xs h-8 px-2.5" title="Start a new chat">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    New
+                </button>
+                <button id="close-doubts-btn" title="Close (Esc)" aria-label="Close AI tutor"
+                        class="w-9 h-9 rounded-full flex items-center justify-center transition"
+                        style="background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text);">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-        </form>
+        </div>
+        <div class="flex flex-1 min-h-0">
+            <!-- Chats sidebar -->
+            <aside id="chats-list-pane" class="hidden md:flex md:flex-col w-56 flex-shrink-0" style="border-right: 1px solid var(--border); background: var(--surface-2);">
+                <div class="px-3 py-2 text-[10px] font-semibold tracking-[0.18em] uppercase" style="color: var(--text-faint)">Chats</div>
+                <div id="chats-list" class="flex-1 overflow-y-auto px-2 pb-3 space-y-1"></div>
+            </aside>
+            <!-- Active chat -->
+            <main class="flex-1 flex flex-col min-h-0">
+                <div id="active-chat-title" class="hidden px-4 py-2 text-xs font-medium truncate" style="color: var(--text-muted); border-bottom: 1px solid var(--border)"></div>
+                <div id="doubts-history" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
+                <div id="chat-suggestions" class="px-5 pb-3 hidden">
+                    <div class="text-[10px] tracking-[0.18em] uppercase mb-2" style="color: var(--text-faint)">Try asking</div>
+                    <div id="chat-suggestion-chips" class="flex flex-wrap gap-2"></div>
+                </div>
+                <form id="doubt-form" class="p-3" style="border-top: 1px solid var(--border); background: var(--surface-2)">
+                    <div class="flex gap-2 items-end card p-1.5" style="border-radius: 12px;">
+                        <textarea id="doubt-input" placeholder="Ask anything about your roadmap…"
+                            class="input-bare flex-1 px-3 py-1.5 text-sm resize-none" rows="1" required
+                            style="max-height: 140px;"></textarea>
+                        <button type="submit" id="doubt-submit-btn" class="btn btn-primary h-8 px-3 text-xs">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                        </button>
+                    </div>
+                    <div class="text-[10px] mt-1.5 px-1" style="color: var(--text-faint)">
+                        <kbd class="px-1 py-0.5 rounded" style="background: var(--surface-2); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 9px;">Enter</kbd> to send · <kbd class="px-1 py-0.5 rounded" style="background: var(--surface-2); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 9px;">Shift+Enter</kbd> for newline
+                    </div>
+                </form>
+            </main>
+        </div>
     </aside>
+
+    <!-- PROFILE MODAL -->
+    <div id="profile-modal" class="hidden modal-backdrop">
+        <div class="card max-w-lg w-full overflow-hidden flex flex-col animate-scale-in" style="border-radius: 18px; max-height: 92vh;">
+            <div class="p-5 flex items-center justify-between" style="border-bottom: 1px solid var(--border)">
+                <div>
+                    <h3 class="font-semibold text-base">Your profile</h3>
+                    <p class="text-[10px] tracking-[0.18em] uppercase mt-1" style="color: var(--text-faint)">Personalises AI tutor &amp; roadmaps</p>
+                </div>
+                <button id="close-profile-btn" aria-label="Close profile"
+                        class="w-9 h-9 rounded-full flex items-center justify-center transition"
+                        style="background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text);">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <form id="profile-form" class="flex-1 overflow-y-auto p-6 space-y-5">
+                <div>
+                    <label class="text-[10px] font-semibold tracking-[0.18em] uppercase mb-2 block" style="color: var(--text-muted)">Display name</label>
+                    <input type="text" id="profile-name" maxlength="80" placeholder="What should we call you?"
+                        class="w-full px-3 py-2.5 rounded-lg text-sm" style="background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); outline: none;" />
+                </div>
+                <div>
+                    <label class="text-[10px] font-semibold tracking-[0.18em] uppercase mb-2 block" style="color: var(--text-muted)">Age</label>
+                    <input type="number" id="profile-age" min="5" max="120" placeholder="e.g., 21"
+                        class="w-full px-3 py-2.5 rounded-lg text-sm" style="background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); outline: none;" />
+                </div>
+                <div>
+                    <label class="text-[10px] font-semibold tracking-[0.18em] uppercase mb-2 block" style="color: var(--text-muted)">Skills</label>
+                    <div class="tag-input-wrap" data-tag-target="skills">
+                        <span id="skills-tags" class="contents"></span>
+                        <input type="text" id="skills-input" placeholder="Type a skill, press Enter…" />
+                    </div>
+                    <p class="text-[10px] mt-1.5" style="color: var(--text-faint)">e.g., Python, React, Machine Learning. Press Enter or comma to add.</p>
+                </div>
+                <div>
+                    <label class="text-[10px] font-semibold tracking-[0.18em] uppercase mb-2 block" style="color: var(--text-muted)">Interests</label>
+                    <div class="tag-input-wrap" data-tag-target="interests">
+                        <span id="interests-tags" class="contents"></span>
+                        <input type="text" id="interests-input" placeholder="Type an interest, press Enter…" />
+                    </div>
+                    <p class="text-[10px] mt-1.5" style="color: var(--text-faint)">e.g., AI, design, robotics, fintech.</p>
+                </div>
+                <div>
+                    <label class="text-[10px] font-semibold tracking-[0.18em] uppercase mb-2 block" style="color: var(--text-muted)">Preferred learning style</label>
+                    <div id="style-options" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+                </div>
+            </form>
+            <div class="p-4 flex items-center justify-between gap-3" style="border-top: 1px solid var(--border); background: var(--surface-2);">
+                <p class="text-[11px]" style="color: var(--text-muted)">Saved locally with your account.</p>
+                <div class="flex items-center gap-2">
+                    <button id="profile-cancel-btn" type="button" class="btn btn-ghost text-xs h-9">Cancel</button>
+                    <button id="profile-save-btn" type="button" class="btn btn-primary text-xs h-9">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        Save profile
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- QUIZ MODAL -->
     <div id="quiz-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" style="background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);">
@@ -714,14 +1178,18 @@
         // =============================================================
         let userAccessToken = localStorage.getItem('notschool_access_token') || null;
         let currentUser = null;
+        let userProfile = { skills: [], interests: [], age: null, display_name: null, learning_style: null };
         let tokenClient;
-        let currentMode = 'learning';
         let selectedFile = null;
         let lastGeneratedCurriculumId = null;
         let activeCurriculumId = null;
         let activeModuleDay = null;
         let currentQuiz = null;
         let currentAnswers = [];
+        let _rescheduleTimer = null;
+        let _rescheduleIntervalMs = 5 * 60 * 1000; // adapts to the user's tightest cadence
+        let _activeCurriculumDetail = null;
+        let _selectedTimeframeUnit = 'day';
 
         // =============================================================
         //  API HELPERS
@@ -784,34 +1252,223 @@
             handleSignOut('You have been signed out.');
         });
 
+        // =============================================================
+        //  USER MENU + PROFILE MODAL
+        // =============================================================
+        const userMenuBtn = document.getElementById('user-chip-btn');
+        const userMenu = document.getElementById('user-menu');
+
+        function toggleUserMenu(force) {
+            const wasOpen = !userMenu.classList.contains('hidden');
+            const willOpen = force === undefined ? !wasOpen : force;
+            userMenu.classList.toggle('hidden', !willOpen);
+            userMenuBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        }
+        userMenuBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleUserMenu(); });
+        document.addEventListener('click', (e) => {
+            if (!userMenu.classList.contains('hidden') && !e.target.closest('#user-chip')) toggleUserMenu(false);
+        });
+        document.getElementById('menu-dashboard-btn').addEventListener('click', () => {
+            toggleUserMenu(false);
+            showView('dashboard');
+        });
+        document.getElementById('open-profile-btn').addEventListener('click', () => {
+            toggleUserMenu(false);
+            openProfileModal();
+        });
+
+        const profileModal = document.getElementById('profile-modal');
+        const LEARNING_STYLES = [
+            { value: 'visual',     label: 'Visual',     icon: 'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+            { value: 'hands-on',   label: 'Hands-on',   icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H7a2 2 0 00-2 2v2m12-4V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2' },
+            { value: 'reading',    label: 'Reading',    icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
+            { value: 'video',      label: 'Video',      icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+        ];
+
+        function openProfileModal() {
+            // Hydrate the form from the in-memory profile (which is refreshed on login).
+            document.getElementById('profile-name').value = userProfile.display_name || currentUser?.name || '';
+            document.getElementById('profile-age').value = userProfile.age ?? '';
+            renderTagChips('skills', userProfile.skills || []);
+            renderTagChips('interests', userProfile.interests || []);
+            renderStyleOptions(userProfile.learning_style);
+            profileModal.classList.remove('hidden');
+            setTimeout(() => document.getElementById('profile-name').focus(), 100);
+        }
+        function closeProfileModal() { profileModal.classList.add('hidden'); }
+
+        document.getElementById('close-profile-btn').addEventListener('click', closeProfileModal);
+        document.getElementById('profile-cancel-btn').addEventListener('click', closeProfileModal);
+        profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeProfileModal(); });
+
+        // ---- Tag input handling (shared between skills + interests) ----
+        const _tagState = { skills: [], interests: [] };
+        function renderTagChips(key, items) {
+            _tagState[key] = Array.from(items || []);
+            const host = document.getElementById(`${key}-tags`);
+            host.innerHTML = '';
+            _tagState[key].forEach((tag, idx) => {
+                const chip = document.createElement('span');
+                chip.className = 'tag-chip';
+                chip.innerHTML = `${escapeHtml(tag)}<button type="button" aria-label="Remove ${escapeHtml(tag)}"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>`;
+                chip.querySelector('button').onclick = () => {
+                    _tagState[key].splice(idx, 1);
+                    renderTagChips(key, _tagState[key]);
+                };
+                host.appendChild(chip);
+            });
+        }
+        function attachTagInput(key) {
+            const input = document.getElementById(`${key}-input`);
+            const commit = () => {
+                const raw = input.value.trim().replace(/,$/, '').trim();
+                if (!raw) return;
+                if (raw.length > 60) {
+                    showToast('Tag is too long', 'error');
+                    return;
+                }
+                if (!_tagState[key].some(x => x.toLowerCase() === raw.toLowerCase()) && _tagState[key].length < 20) {
+                    _tagState[key].push(raw);
+                    renderTagChips(key, _tagState[key]);
+                }
+                input.value = '';
+            };
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    commit();
+                } else if (e.key === 'Backspace' && !input.value && _tagState[key].length) {
+                    _tagState[key].pop();
+                    renderTagChips(key, _tagState[key]);
+                }
+            });
+            input.addEventListener('blur', commit);
+            // Allow click anywhere in the tag-wrap to focus input
+            input.parentElement.addEventListener('click', (e) => {
+                if (e.target === input.parentElement) input.focus();
+            });
+        }
+        attachTagInput('skills');
+        attachTagInput('interests');
+
+        let _activeStyle = null;
+        function renderStyleOptions(active) {
+            _activeStyle = (active || '').toLowerCase() || null;
+            const wrap = document.getElementById('style-options');
+            wrap.innerHTML = '';
+            LEARNING_STYLES.forEach(opt => {
+                const isActive = _activeStyle === opt.value;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.value = opt.value;
+                btn.className = 'flex flex-col items-center gap-1.5 p-2.5 rounded-lg text-xs font-medium transition' + (isActive ? ' active-style' : '');
+                btn.style.cssText = isActive
+                    ? 'background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.4); color:#F97316;'
+                    : 'background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);';
+                btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="${opt.icon}"/></svg>${opt.label}`;
+                btn.onclick = () => {
+                    // Click an active option to deselect; otherwise switch to that one.
+                    renderStyleOptions(isActive ? null : opt.value);
+                };
+                wrap.appendChild(btn);
+            });
+        }
+
+        document.getElementById('profile-save-btn').addEventListener('click', async () => {
+            // Make sure any half-typed tag is committed before saving.
+            ['skills', 'interests'].forEach(k => {
+                const inp = document.getElementById(`${k}-input`);
+                if (inp.value.trim()) inp.dispatchEvent(new Event('blur'));
+            });
+
+            const fd = new FormData();
+            fd.append('display_name', document.getElementById('profile-name').value.trim());
+            fd.append('age', document.getElementById('profile-age').value.trim());
+            fd.append('skills', _tagState.skills.join(','));
+            fd.append('interests', _tagState.interests.join(','));
+            fd.append('learning_style', _activeStyle || '');
+
+            const btn = document.getElementById('profile-save-btn');
+            btn.disabled = true;
+            const original = btn.innerHTML;
+            btn.innerHTML = `<div class="spinner" style="border-color: rgba(255,255,255,0.3); border-top-color: white;"></div>Saving…`;
+            try {
+                const res = await api('/api/profile', { method: 'PUT', body: fd });
+                userProfile = res.profile || userProfile;
+                userName.textContent = userProfile.display_name || (currentUser?.name || currentUser?.email || '').split(' ')[0];
+                if (!document.getElementById('dashboard-view').classList.contains('hidden')) renderGreeting();
+                showToast('Profile saved');
+                closeProfileModal();
+            } catch (e) {
+                showToast(e.message || 'Could not save profile', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        });
+
+        // Move the theme toggle out of its fixed corner and into the header
+        // beside the user chip (when signed in) so it never overlaps the
+        // back-to-dashboard button on the curriculum detail view.
+        function dockThemeToggle(into) {
+            const toggle = document.getElementById('themeToggle');
+            const fixedWrap = document.getElementById('theme-toggle-wrap');
+            const inlineSlot = document.getElementById('theme-toggle-slot');
+            if (!toggle || !fixedWrap || !inlineSlot) return;
+            if (into === 'inline') {
+                if (toggle.parentElement !== inlineSlot) inlineSlot.appendChild(toggle);
+                fixedWrap.classList.add('hidden');
+            } else {
+                if (toggle.parentElement !== fixedWrap) fixedWrap.appendChild(toggle);
+                fixedWrap.classList.remove('hidden');
+            }
+        }
+
         async function initializeAfterLogin() {
             _signOutNotified = false;
             try {
                 const result = await api('/api/auth/verify', { method: 'POST' });
                 currentUser = result.user;
+                userProfile = result.user.profile || { skills: [], interests: [] };
                 userPic.src = safeUrl(currentUser.picture) || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="%23F97316"/></svg>';
-                userName.textContent = (currentUser.name || currentUser.email || '').split(' ')[0];
+                userName.textContent = userProfile.display_name || (currentUser.name || currentUser.email || '').split(' ')[0];
+                document.getElementById('menu-name').textContent = currentUser.name || userProfile.display_name || '—';
+                document.getElementById('menu-email').textContent = currentUser.email || '';
                 userChip.classList.remove('hidden');
-                userChip.classList.add('inline-flex');
                 mainNav.classList.remove('hidden');
                 doubtsFab.classList.remove('hidden');
                 loginOverlay.classList.add('hidden-view');
+                dockThemeToggle('inline');
+
+                // Nudge first-time users to fill out their profile so AI personalisation kicks in.
+                const hasProfile = (userProfile.age) || (userProfile.skills && userProfile.skills.length) || (userProfile.interests && userProfile.interests.length);
+                if (!hasProfile && !localStorage.getItem('notschool_profile_nudged')) {
+                    setTimeout(() => {
+                        showToast('Tip: complete your profile so the AI tailors lessons to you.');
+                        localStorage.setItem('notschool_profile_nudged', '1');
+                    }, 1200);
+                }
+
                 showView('dashboard');
+                startRescheduleRoutine();
             } catch (e) {
                 console.error(e); handleSignOut();
             }
         }
 
         function handleSignOut(msg) {
+            stopRescheduleRoutine();
             userAccessToken = null;
             currentUser = null;
+            userProfile = { skills: [], interests: [] };
             localStorage.removeItem('notschool_access_token');
             loginOverlay.classList.remove('hidden-view');
             userChip.classList.add('hidden');
-            userChip.classList.remove('inline-flex');
             mainNav.classList.add('hidden');
             doubtsFab.classList.add('hidden');
+            document.getElementById('user-menu').classList.add('hidden');
             ['generate-view','dashboard-view','detail-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            dockThemeToggle('fixed');
             if (msg) showToast(msg, 'error');
         }
 
@@ -859,24 +1516,60 @@
         async function loadDashboard() {
             try {
                 const data = await api('/api/dashboard');
+                renderGreeting();
                 renderStats(data.stats);
+                renderNextSession(data.next_session);
                 renderCurricula(data.curricula);
             } catch (e) { console.error(e); }
         }
 
+        function renderGreeting() {
+            const el = document.getElementById('dashboard-greeting');
+            const first = (userProfile?.display_name || currentUser?.name || '').trim().split(' ')[0];
+            const hour = new Date().getHours();
+            const part = hour < 5 ? 'Good night' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+            el.textContent = first ? `${part}, ${first}` : 'Dashboard';
+        }
+
         function renderStats(stats) {
             const wrap = document.getElementById('dashboard-stats');
+            const streakLabel = stats.current_streak > 0
+                ? `${stats.current_streak}🔥`
+                : '0';
             wrap.innerHTML = `
-                ${statCard('Roadmaps', stats.total_curricula)}
-                ${statCard('Sessions', stats.total_sessions)}
-                ${statCard('Completed', stats.completed_sessions)}
-                ${statCard('Progress', stats.completion_pct + '%', true)}
+                ${statCard('Day streak', streakLabel, true, stats.best_streak ? `Best: ${stats.best_streak}` : 'Start today')}
+                ${statCard('Progress', stats.completion_pct + '%', false, `${stats.completed_sessions}/${stats.total_sessions} sessions`)}
+                ${statCard('This week', stats.weekly_completed || 0, false, 'sessions completed')}
+                ${statCard('Quiz accuracy', (stats.quiz_accuracy_pct || 0) + '%', false, `${stats.quizzes_attempted || 0} attempted`)}
             `;
         }
-        function statCard(label, val, accent) {
+
+        function renderNextSession(next) {
+            const box = document.getElementById('dashboard-next');
+            if (!next) { box.classList.add('hidden'); return; }
+            box.classList.remove('hidden');
+            const when = formatDate(next.scheduled_time);
+            const overdue = isOverdue(next.scheduled_time);
+            const labelText = overdue ? 'Overdue session' : 'Next up';
+            const labelStyle = overdue ? 'color:#DC2626' : 'color:#F97316';
+            box.innerHTML = `
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background: rgba(249,115,22,0.15); color:#F97316;">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-[10px] font-semibold tracking-[0.18em] uppercase mb-1" style="${labelStyle}">${labelText}</div>
+                        <h4 class="font-semibold text-[15px] leading-snug">${escapeHtml(next.module_name)}</h4>
+                        <p class="text-xs mt-1" style="color: var(--text-muted)">${escapeHtml(next.curriculum_title || '')} · ${when}</p>
+                    </div>
+                    <button onclick="openCurriculum(${next.curriculum_id})" class="btn btn-primary text-xs h-9">Open</button>
+                </div>`;
+        }
+        function statCard(label, val, accent, sub) {
             return `<div class="card p-5 card-hover">
                 <div class="text-[10px] font-semibold tracking-[0.18em] uppercase mb-2" style="color: var(--text-muted)">${label}</div>
                 <div class="text-2xl md:text-3xl font-semibold tracking-tight ${accent ? 'text-accent' : ''}" ${accent ? 'style="color:#F97316"' : ''}>${val}</div>
+                ${sub ? `<div class="text-[10px] mt-1" style="color: var(--text-faint)">${escapeHtml(sub)}</div>` : ''}
             </div>`;
         }
 
@@ -896,14 +1589,16 @@
             counter.textContent = `${list.length} total`;
             list.forEach((c, idx) => {
                 const date = parseUtcDate(c.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-                const modeLabel = c.mode === 'interview' ? 'Interview' : 'Learning';
                 const card = document.createElement('div');
                 card.className = 'card card-hover p-5 cursor-pointer animate-fade-in-up';
                 card.style.animationDelay = (idx * 40) + 'ms';
                 card.onclick = () => openCurriculum(c.id);
+                const isDone = c.total_modules > 0 && c.completed_modules === c.total_modules;
+                const stateLabel = isDone ? 'Completed' : c.completed_modules > 0 ? 'In progress' : 'Not started';
+                const stateClass = isDone ? 'pill-accent' : '';
                 card.innerHTML = `
                     <div class="flex items-start justify-between gap-3 mb-4">
-                        <span class="pill">${modeLabel}</span>
+                        <span class="pill ${stateClass}">${stateLabel}</span>
                         <span class="text-[10px] font-mono" style="color: var(--text-faint)">${date}</span>
                     </div>
                     <h3 class="font-semibold text-[15px] mb-1.5 line-clamp-2 leading-snug">${escapeHtml(c.title || c.goal)}</h3>
@@ -925,15 +1620,21 @@
             activeCurriculumId = curriculumId;
             try {
                 const data = await api(`/api/curriculum/${curriculumId}`);
-                renderDetail(data.curriculum, data.sessions);
+                renderDetail(data.curriculum, data.sessions, data.quiz_stats);
                 showView('detail');
             } catch (e) { console.error(e); showToast('Failed to load roadmap', 'error'); }
         }
 
-        async function renderDetail(curriculum, sessions) {
+        async function renderDetail(curriculum, sessions, quizStats) {
+            // Stash the active curriculum so the planner can read its cadence
+            // without threading it through every helper.
+            _activeCurriculumDetail = curriculum;
+
             document.getElementById('detail-title').innerText = curriculum.title || curriculum.goal;
             const created = parseUtcDate(curriculum.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
-            document.getElementById('detail-meta').innerText = `${curriculum.mode === 'interview' ? 'Interview prep' : 'Learning'} · ${created}`;
+            const cadenceText = formatCadence(curriculum.timeframe_amount, curriculum.timeframe_unit);
+            const metaEl = document.getElementById('detail-meta');
+            metaEl.innerHTML = `<span>Learning roadmap · ${escapeHtml(created)}</span> <span class="cadence-pill" title="Time between consecutive modules"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>${escapeHtml(cadenceText)}</span>`;
 
             const total = sessions.length;
             const done = sessions.filter(s => s.status === 'completed').length;
@@ -941,33 +1642,10 @@
             document.getElementById('detail-progress').innerText = `${done}/${total} · ${pct}%`;
 
             const cj = curriculum.curriculum_json || {};
-            let def = "graph TD;\n";
             const mods = cj.modules || [];
-            if (mods.length > 0) {
-                let prev = null;
-                mods.forEach((m, i) => {
-                    const id = `N${i}`;
-                    const safe = (m.topic || 'Module').replace(/[^a-zA-Z0-9 \-]/g, "").trim();
-                    def += `  ${id}["Day ${m.day || i+1}: ${safe}\n${m.duration_hours || 1}h"];\n`;
-                    if (prev) def += `  ${prev} --> ${id};\n`;
-                    prev = id;
-                });
-            } else { def += "  Start --> End;\n"; }
-            try {
-                const { svg } = await mermaid.render('mg-' + Date.now(), def);
-                document.getElementById('detail-mermaid').innerHTML = svg;
-            } catch { document.getElementById('detail-mermaid').innerHTML = ''; }
+            renderRoadmapChart(mods, sessions);
 
-            const trendsBox = document.getElementById('detail-trends');
-            const trendsOut = document.getElementById('detail-trends-out');
-            trendsOut.innerHTML = '';
-            const allTrends = [...(curriculum.web_trends || []), ...(cj.trends || [])];
-            if (allTrends.length > 0) {
-                trendsBox.classList.remove('hidden');
-                [...new Set(allTrends)].slice(0, 10).forEach(t => {
-                    trendsOut.innerHTML += `<span class="pill pill-accent">${escapeHtml(t)}</span>`;
-                });
-            } else trendsBox.classList.add('hidden');
+            renderDetailQuizProgress(quizStats || {}, sessions);
 
             const certsBox = document.getElementById('detail-certs');
             const certsOut = document.getElementById('detail-certs-out');
@@ -979,28 +1657,7 @@
                 });
             } else certsBox.classList.add('hidden');
 
-            const oppsBox = document.getElementById('detail-opps');
-            const oppsOut = document.getElementById('detail-opps-out');
-            oppsOut.innerHTML = '';
-            const liveOpps = (curriculum.opportunities || []).filter(o => o.source !== 'error');
-            const currOpps = (cj.opportunities || []);
-            const allOpps = [...currOpps, ...liveOpps].slice(0, 8);
-            if (allOpps.length > 0) {
-                oppsBox.classList.remove('hidden');
-                allOpps.forEach(o => {
-                    const t = (o.type || 'program').toLowerCase();
-                    const safeOppUrl = safeUrl(o.url);
-                    const titleHtml = safeOppUrl ? `<a href="${safeOppUrl}" target="_blank" rel="noopener noreferrer" class="hover:text-accent transition" style="color: var(--text)">${escapeHtml(o.title || 'Opportunity')}</a>` : escapeHtml(o.title || 'Opportunity');
-                    oppsOut.innerHTML += `
-                    <div class="p-3 rounded-xl" style="background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.18);">
-                        <div class="flex items-start justify-between gap-2 mb-1">
-                            <div class="font-semibold text-sm leading-snug">${titleHtml}</div>
-                            <span class="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background: rgba(16,185,129,0.12); color: #059669;">${t}</span>
-                        </div>
-                        ${o.description ? `<p class="text-[11px] line-clamp-2" style="color: var(--text-muted)">${escapeHtml(o.description)}</p>` : ''}
-                    </div>`;
-                });
-            } else oppsBox.classList.add('hidden');
+            renderInitiatives(curriculum, cj);
 
             renderPlanner(sessions);
 
@@ -1012,6 +1669,115 @@
                     showView('dashboard');
                 } catch (e) { showToast('Failed: ' + e.message, 'error'); }
             };
+
+            document.getElementById('export-curriculum-btn').onclick = () => {
+                const payload = {
+                    title: curriculum.title || curriculum.goal,
+                    goal: curriculum.goal,
+                    created_at: curriculum.created_at,
+                    progress: { completed: done, total: total, percent: pct },
+                    modules: (cj.modules || []).map((m, i) => ({
+                        ...m,
+                        session: sessions[i] ? {
+                            scheduled_time: sessions[i].scheduled_time,
+                            status: sessions[i].status,
+                            youtube_url: sessions[i].youtube_url,
+                            quiz_score: sessions[i].quiz_score,
+                            quiz_total: sessions[i].quiz_total,
+                        } : null,
+                    })),
+                    initiatives: cj.initiatives || cj.opportunities || [],
+                    certifications: cj.certifications || [],
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = (curriculum.title || curriculum.goal || 'roadmap').replace(/[^a-z0-9-]+/gi, '_').slice(0, 60) + '.json';
+                document.body.appendChild(a); a.click(); a.remove();
+                URL.revokeObjectURL(url);
+                showToast('Roadmap exported');
+            };
+        }
+
+        function renderRoadmapChart(modules, sessions) {
+            const wrap = document.getElementById('detail-roadmap');
+            wrap.innerHTML = '';
+            if (!modules || !modules.length) {
+                wrap.innerHTML = `<p class="text-sm text-center py-6" style="color: var(--text-muted)">No modules in this roadmap.</p>`;
+                return;
+            }
+            const sessionByDay = {};
+            (sessions || []).forEach(s => { if (s.module_day != null) sessionByDay[s.module_day] = s; });
+
+            // The "active" step is the first non-completed module — that's what
+            // the user is working on right now. Useful for the pulse animation.
+            let activeIdx = -1;
+            for (let i = 0; i < modules.length; i++) {
+                const day = Number(modules[i].day) || (i + 1);
+                const s = sessionByDay[day];
+                if (!s || s.status !== 'completed') { activeIdx = i; break; }
+            }
+
+            const chart = document.createElement('div');
+            chart.className = 'roadmap-chart';
+            modules.forEach((m, i) => {
+                const day = Number(m.day) || (i + 1);
+                const s = sessionByDay[day];
+                const isDone = s && s.status === 'completed';
+                const overdue = s && !isDone && isOverdue(s.scheduled_time);
+                const isActive = i === activeIdx;
+
+                const stepClasses = ['roadmap-step'];
+                if (isDone) stepClasses.push('done');
+                else if (isActive) stepClasses.push('active');
+                if (overdue) stepClasses.push('overdue');
+
+                const step = document.createElement('div');
+                step.className = stepClasses.join(' ');
+                step.style.animationDelay = (i * 60) + 'ms';
+
+                const checkSvg = `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+                const dayContent = isDone
+                    ? checkSvg
+                    : `<div class="flex flex-col items-center"><span class="day-label">Day</span><span class="day-num">${day}</span></div>`;
+
+                const statusBadge = isDone
+                    ? `<span class="pill" style="background: rgba(16,185,129,0.1); color:#059669; border-color: rgba(16,185,129,0.25);">Done</span>`
+                    : overdue
+                        ? `<span class="pill" style="background: rgba(239,68,68,0.08); color:#DC2626; border-color: rgba(239,68,68,0.25);">Overdue</span>`
+                        : isActive
+                            ? `<span class="pill pill-accent">Up next</span>`
+                            : `<span class="pill">Day ${day}</span>`;
+
+                const topic = escapeHtml(m.topic || 'Module');
+                const desc = escapeHtml(m.description || '');
+                const dur = (m.duration_hours || 1) + 'h';
+
+                step.tabIndex = 0;
+                step.innerHTML = `
+                    <div class="roadmap-day-circle">${dayContent}</div>
+                    <div class="roadmap-card">
+                        <div class="roadmap-card-row">
+                            <div style="min-width: 0; flex: 1;">
+                                <div class="roadmap-topic">${topic}</div>
+                                ${desc
+                                    ? `<div class="roadmap-card-hint">Hover to see details</div>
+                                       <div class="roadmap-desc">${desc}</div>`
+                                    : ''}
+                            </div>
+                            <div class="flex flex-col items-end gap-1.5">
+                                ${statusBadge}
+                                <div class="roadmap-meta">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>${dur}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                chart.appendChild(step);
+            });
+            wrap.appendChild(chart);
         }
 
         function renderPlanner(sessions) {
@@ -1020,11 +1786,31 @@
             if (!sessions || sessions.length === 0) {
                 wrap.innerHTML = `<p class="text-sm" style="color: var(--text-muted)">No sessions found.</p>`; return;
             }
+            // Sequential mark-done: the lowest-day pending session is the only
+            // one a user can finish next. Everything after it is locked until
+            // earlier modules are done.
+            const orderedDays = sessions
+                .map(s => Number(s.module_day))
+                .filter(d => Number.isFinite(d))
+                .sort((a, b) => a - b);
+            const firstPendingDay = sessions
+                .filter(s => s.status !== 'completed')
+                .map(s => Number(s.module_day))
+                .filter(d => Number.isFinite(d))
+                .sort((a, b) => a - b)[0] ?? null;
+
             sessions.forEach((s, idx) => {
                 const dateStr = formatDate(s.scheduled_time);
                 const isDone = s.status === 'completed';
+                const isRescheduled = s.status === 'rescheduled';
+                const overdue = !isDone && isOverdue(s.scheduled_time);
                 const safeYt = safeUrl(s.youtube_url);
                 const safeCal = safeUrl(s.event_link);
+                let statusBadge = '';
+                if (isDone) statusBadge = `<span class="pill" style="background: rgba(16,185,129,0.1); color:#059669; border-color: rgba(16,185,129,0.25);">Done</span>`;
+                else if (overdue) statusBadge = `<span class="pill" style="background: rgba(239,68,68,0.08); color:#DC2626; border-color: rgba(239,68,68,0.25);">Overdue</span>`;
+                else if (isRescheduled) statusBadge = `<span class="pill" style="background: rgba(234,179,8,0.1); color:#CA8A04; border-color: rgba(234,179,8,0.25);">Rescheduled</span>`;
+                else statusBadge = `<span class="pill">Scheduled</span>`;
 
                 const ytBtn = safeYt
                     ? `<a href="${safeYt}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary text-xs h-9">
@@ -1047,15 +1833,22 @@
                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                        Doubt
                    </button>`;
+                const sessionDay = Number(s.module_day);
+                const isLocked = !isDone && firstPendingDay !== null && Number.isFinite(sessionDay) && sessionDay > firstPendingDay;
                 const completeBtn = isDone
                     ? `<button class="btn text-xs h-9 cursor-default" style="background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.25);">
                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                           Done
                        </button>`
-                    : `<button onclick="completeSession(${s.id})" class="btn btn-primary text-xs h-9">
-                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                          Mark done
-                       </button>`;
+                    : isLocked
+                        ? `<button disabled class="btn btn-locked text-xs h-9" title="Finish Day ${firstPendingDay} first">
+                               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                               Locked
+                           </button>`
+                        : `<button onclick="completeSession(${s.id})" class="btn btn-primary text-xs h-9">
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                              Mark done
+                           </button>`;
 
                 const row = document.createElement('div');
                 row.className = 'card p-5 animate-fade-in-up' + (isDone ? ' opacity-70' : '');
@@ -1067,12 +1860,16 @@
                             <div class="text-base font-semibold leading-none">${s.module_day || '?'}</div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="font-semibold text-[15px] leading-snug ${isDone ? 'line-through' : ''}">${escapeHtml(s.module_name)}</h4>
+                            <div class="flex items-start justify-between gap-2">
+                                <h4 class="font-semibold text-[15px] leading-snug ${isDone ? 'line-through' : ''}">${escapeHtml(s.module_name)}</h4>
+                                ${statusBadge}
+                            </div>
                             <p class="text-xs mt-1 line-clamp-2" style="color: var(--text-muted)">${escapeHtml(s.module_description || '')}</p>
                             <div class="flex items-center gap-3 text-[10px] mt-2 font-medium tracking-wide uppercase" style="color: var(--text-faint)">
                                 <span>${dateStr}</span>
                                 <span>·</span>
                                 <span>${s.duration_hours || 1}h</span>
+                                ${s.quiz_score != null ? `<span>·</span><span style="color:#8B5CF6">Quiz ${s.quiz_score}/${s.quiz_total}</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -1087,10 +1884,56 @@
         async function completeSession(sessionId) {
             try {
                 const fd = new FormData(); fd.append('session_id', sessionId);
-                await api('/api/session/complete', { method: 'POST', body: fd });
-                showToast('Session marked complete');
+                const res = await api('/api/session/complete', { method: 'POST', body: fd });
+                showToast(res.calendar_removed
+                    ? 'Session done — calendar event cleared'
+                    : 'Session marked complete');
                 if (activeCurriculumId) openCurriculum(activeCurriculumId);
-            } catch (e) { showToast('Failed: ' + e.message, 'error'); }
+            } catch (e) {
+                // Backend returns 409 for out-of-order completion attempts. The
+                // detail message ("Finish Day N first…") already reads well.
+                showToast(e.message || 'Could not mark complete', 'error');
+            }
+        }
+
+        function renderDetailQuizProgress(stats, sessions) {
+            const box = document.getElementById('detail-quiz-progress');
+            const totalModules = sessions.length;
+            const haveAny = (stats.quizzes_total || 0) > 0 || sessions.some(s => s.quiz_id);
+            if (!haveAny || !totalModules) { box.classList.add('hidden'); return; }
+            box.classList.remove('hidden');
+            const attempted = stats.quizzes_attempted || 0;
+            const earned = stats.points_earned || 0;
+            const possible = stats.points_possible || 0;
+            const accuracy = stats.accuracy_pct || 0;
+            document.getElementById('detail-quiz-attempted').textContent = `${attempted}/${totalModules}`;
+            document.getElementById('detail-quiz-points').textContent = `${earned}/${possible}`;
+            document.getElementById('detail-quiz-accuracy').textContent = `${accuracy}%`;
+            document.getElementById('detail-quiz-summary').textContent =
+                attempted === 0 ? 'No quizzes attempted yet'
+                : `${attempted} of ${totalModules} modules quizzed`;
+            const bar = document.getElementById('detail-quiz-bar');
+            bar.style.width = `${Math.round((attempted / totalModules) * 100)}%`;
+
+            const cells = document.getElementById('detail-quiz-cells');
+            cells.innerHTML = '';
+            sessions.forEach((s) => {
+                let bg = 'var(--surface-2)', border = 'var(--border)', tip = `Day ${s.module_day}: not attempted`;
+                if (s.quiz_score != null && s.quiz_total) {
+                    const p = s.quiz_score / s.quiz_total;
+                    if (p >= 0.8) { bg = 'rgba(16,185,129,0.4)'; border = 'rgba(16,185,129,0.6)'; }
+                    else if (p >= 0.5) { bg = 'rgba(234,179,8,0.4)'; border = 'rgba(234,179,8,0.6)'; }
+                    else { bg = 'rgba(239,68,68,0.4)'; border = 'rgba(239,68,68,0.6)'; }
+                    tip = `Day ${s.module_day}: ${s.quiz_score}/${s.quiz_total}`;
+                }
+                cells.innerHTML += `<div title="${escapeHtml(tip)}" class="rounded-md" style="width: 22px; height: 22px; background: ${bg}; border: 1px solid ${border};"></div>`;
+            });
+        }
+
+        function isOverdue(scheduledTime) {
+            if (!scheduledTime) return false;
+            const t = new Date(String(scheduledTime).replace(' ', 'T'));
+            return !isNaN(t) && t.getTime() < Date.now();
         }
 
         // =============================================================
@@ -1100,9 +1943,20 @@
         document.getElementById('close-quiz-btn').addEventListener('click', () => quizModal.classList.add('hidden'));
         quizModal.addEventListener('click', (e) => { if (e.target === quizModal) quizModal.classList.add('hidden'); });
         document.addEventListener('keydown', (e) => {
+            // Cmd/Ctrl+K — open AI tutor (works anywhere except inside an input)
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                const tag = (e.target.tagName || '').toLowerCase();
+                if (tag !== 'input' && tag !== 'textarea') {
+                    e.preventDefault();
+                    if (currentUser) { activeModuleDay = null; openTutor(); }
+                    return;
+                }
+            }
             if (e.key !== 'Escape') return;
+            const profileModalEl = document.getElementById('profile-modal');
+            if (profileModalEl && !profileModalEl.classList.contains('hidden')) { closeProfileModal(); return; }
             if (!quizModal.classList.contains('hidden')) { quizModal.classList.add('hidden'); return; }
-            if (!doubtsPanel.classList.contains('translate-x-full')) doubtsPanel.classList.add('translate-x-full');
+            if (!doubtsPanel.classList.contains('translate-x-full')) closeTutor();
         });
 
         async function openQuiz(curriculumId, moduleDay, topic, opts = {}) {
@@ -1247,53 +2101,296 @@
         }
 
         // =============================================================
-        //  DOUBTS PANEL
+        //  INDUSTRY INITIATIVES
+        // =============================================================
+        function providerColor(p) {
+            const k = (p || '').toLowerCase();
+            if (k.includes('google'))    return { bg: 'rgba(66,133,244,0.10)', fg: '#4285F4', border: 'rgba(66,133,244,0.30)' };
+            if (k.includes('amazon') || k.includes('aws')) return { bg: 'rgba(255,153,0,0.10)', fg: '#FF9900', border: 'rgba(255,153,0,0.30)' };
+            if (k.includes('microsoft')) return { bg: 'rgba(0,164,239,0.10)', fg: '#00A4EF', border: 'rgba(0,164,239,0.30)' };
+            if (k.includes('kaggle'))    return { bg: 'rgba(32,201,151,0.10)', fg: '#20C997', border: 'rgba(32,201,151,0.30)' };
+            return { bg: 'rgba(16,185,129,0.10)', fg: '#059669', border: 'rgba(16,185,129,0.30)' };
+        }
+
+        let _allInitiatives = [];
+        let _initiativeFilter = 'all';
+
+        function renderInitiatives(curriculum, cj) {
+            const oppsBox = document.getElementById('detail-opps');
+            const oppsOut = document.getElementById('detail-opps-out');
+            const filterBox = document.getElementById('opps-filter');
+            const liveOpps = (curriculum.opportunities || []).filter(o => o.source !== 'error');
+            const currOpps = (cj.initiatives || cj.opportunities || []);
+            const merged = [...currOpps, ...liveOpps]
+                .filter(o => o && o.title)
+                .filter(o => !o.url || !/example\.(com|org)/i.test(o.url));
+            const seen = new Set();
+            _allInitiatives = merged.filter(o => {
+                const k = (o.title || '').toLowerCase().trim();
+                if (!k || seen.has(k)) return false;
+                seen.add(k); return true;
+            }).slice(0, 12);
+
+            if (_allInitiatives.length === 0) {
+                oppsBox.classList.add('hidden');
+                return;
+            }
+            oppsBox.classList.remove('hidden');
+
+            const providers = ['all', ...new Set(_allInitiatives.map(o => (o.provider || '').trim()).filter(Boolean))];
+            filterBox.innerHTML = providers.map(p => `
+                <button data-prov="${escapeHtml(p)}" class="px-2 py-1 rounded-md transition ${_initiativeFilter === p ? 'font-semibold' : ''}"
+                    style="${_initiativeFilter === p ? 'background: var(--text); color: var(--bg);' : 'background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border);'}">
+                    ${p === 'all' ? 'All' : escapeHtml(p)}
+                </button>`).join('');
+            filterBox.querySelectorAll('button').forEach(b => {
+                b.onclick = () => { _initiativeFilter = b.dataset.prov; renderInitiatives(curriculum, cj); };
+            });
+
+            const list = _initiativeFilter === 'all'
+                ? _allInitiatives
+                : _allInitiatives.filter(o => (o.provider || '').toLowerCase() === _initiativeFilter.toLowerCase());
+
+            oppsOut.innerHTML = '';
+            list.forEach(o => {
+                const t = (o.type || 'program').toLowerCase();
+                const provider = (o.provider || '').trim();
+                const c = providerColor(provider);
+                const safeOppUrl = safeUrl(o.url);
+                const titleHtml = safeOppUrl
+                    ? `<a href="${safeOppUrl}" target="_blank" rel="noopener noreferrer" class="hover:text-accent transition" style="color: var(--text)">${escapeHtml(o.title)}</a>`
+                    : escapeHtml(o.title);
+                const providerBadge = provider
+                    ? `<span class="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background: ${c.bg}; color: ${c.fg}; border: 1px solid ${c.border};">${escapeHtml(provider)}</span>`
+                    : '';
+                oppsOut.innerHTML += `
+                <div class="p-3 rounded-xl flex flex-col gap-2" style="background: ${c.bg}; border: 1px solid ${c.border};">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="font-semibold text-sm leading-snug flex-1">${titleHtml}</div>
+                        ${providerBadge}
+                    </div>
+                    ${o.description ? `<p class="text-[11px] line-clamp-2" style="color: var(--text-muted)">${escapeHtml(o.description)}</p>` : ''}
+                    <div class="flex items-center justify-between mt-auto pt-1">
+                        <span class="text-[9px] font-semibold uppercase tracking-wider" style="color: ${c.fg};">${escapeHtml(t)}</span>
+                        ${safeOppUrl ? `<a href="${safeOppUrl}" target="_blank" rel="noopener noreferrer" class="text-[10px] font-medium hover:underline" style="color: ${c.fg};">Apply →</a>` : ''}
+                    </div>
+                </div>`;
+            });
+        }
+
+        // =============================================================
+        //  AI TUTOR — multi-chat panel with conversational context
         // =============================================================
         const doubtsPanel = document.getElementById('doubts-panel');
-        document.getElementById('doubts-fab').addEventListener('click', openDoubts);
-        document.getElementById('open-doubts-btn').addEventListener('click', openDoubts);
-        document.getElementById('close-doubts-btn').addEventListener('click', () => doubtsPanel.classList.add('translate-x-full'));
+        const doubtsBackdrop = document.getElementById('doubts-backdrop');
+        const chatsListPane = document.getElementById('chats-list-pane');
+        let activeChatId = null;
+        let _chatList = [];
 
-        async function openDoubts() {
+        function closeTutor() {
+            doubtsPanel.classList.add('translate-x-full');
+            doubtsBackdrop.classList.remove('show');
+            const fab = document.getElementById('doubts-fab');
+            if (currentUser) fab.classList.remove('hidden');
+        }
+
+        document.getElementById('doubts-fab').addEventListener('click', () => { activeModuleDay = null; openTutor(); });
+        document.getElementById('open-doubts-btn').addEventListener('click', () => { activeModuleDay = null; openTutor(); });
+        document.getElementById('close-doubts-btn').addEventListener('click', closeTutor);
+        doubtsBackdrop.addEventListener('click', closeTutor);
+        document.getElementById('new-chat-btn').addEventListener('click', startNewChat);
+        document.getElementById('chats-toggle-btn')?.addEventListener('click', () => {
+            chatsListPane.classList.toggle('hidden');
+            chatsListPane.classList.toggle('flex');
+        });
+
+        async function openTutor(opts = {}) {
             doubtsPanel.classList.remove('translate-x-full');
-            try {
-                const data = await api(`/api/doubts${activeCurriculumId ? '?curriculum_id=' + activeCurriculumId : ''}`);
-                renderDoubts(data.doubts);
-                setTimeout(() => document.getElementById('doubt-input')?.focus(), 250);
-            } catch (e) {
-                console.error(e);
-                showToast('Failed to load doubts: ' + (e.message || 'unknown'), 'error');
+            doubtsBackdrop.classList.add('show');
+            // Hide the FAB while the panel is up so it doesn't overlap the close button.
+            document.getElementById('doubts-fab').classList.add('hidden');
+            await refreshChatList();
+            // Module-scoped opens start a fresh thread so the AI is laser-focused on
+            // that module. Generic opens resume the latest chat for continuity.
+            const matchingChat = activeModuleDay
+                ? _chatList.find(c => c.module_day === activeModuleDay && c.curriculum_id === activeCurriculumId)
+                : _chatList[0];
+            if (opts.forceNew || !matchingChat) {
+                startNewChat();
+            } else {
+                openChat(matchingChat.id);
             }
+            setTimeout(() => document.getElementById('doubt-input')?.focus(), 250);
         }
 
         function openDoubtsForModule(curriculumId, moduleDay) {
             activeCurriculumId = curriculumId;
             activeModuleDay = moduleDay;
-            openDoubts();
+            openTutor();
         }
 
-        // FAB / nav opens doubts WITHOUT pinning to a previous module
-        document.getElementById('doubts-fab').addEventListener('click', () => { activeModuleDay = null; });
-        document.getElementById('open-doubts-btn').addEventListener('click', () => { activeModuleDay = null; });
+        async function refreshChatList() {
+            try {
+                const url = `/api/chats${activeCurriculumId ? '?curriculum_id=' + activeCurriculumId : ''}`;
+                const data = await api(url);
+                _chatList = data.chats || [];
+                renderChatList();
+            } catch (e) {
+                console.error(e);
+                _chatList = [];
+                renderChatList();
+            }
+        }
 
-        function renderDoubts(doubts) {
-            const wrap = document.getElementById('doubts-history');
-            if (!doubts || doubts.length === 0) {
-                wrap.innerHTML = `<div class="text-center py-12 text-sm" style="color: var(--text-faint)">No questions yet.<br/>Ask anything about your roadmap.</div>`;
+        function renderChatList() {
+            const wrap = document.getElementById('chats-list');
+            if (!_chatList.length) {
+                wrap.innerHTML = `<div class="text-[11px] px-2 py-4 text-center" style="color: var(--text-faint)">No chats yet.</div>`;
                 return;
             }
             wrap.innerHTML = '';
-            doubts.slice().reverse().forEach(d => {
-                wrap.innerHTML += `
-                    <div class="space-y-2">
-                        <div class="ml-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-br-md text-sm leading-relaxed"
-                             style="background: #F97316; color: white;">${escapeHtml(d.question)}</div>
-                        <div class="mr-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed"
-                             style="background: var(--surface-2); border: 1px solid var(--border); white-space: pre-wrap;">${renderAnswerMarkdown(d.answer || '')}</div>
-                    </div>`;
+            _chatList.forEach(c => {
+                const isActive = c.id === activeChatId;
+                const when = parseUtcDate(c.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                const item = document.createElement('div');
+                item.className = 'group px-2.5 py-2 rounded-lg cursor-pointer transition flex items-center gap-2';
+                item.style.cssText = isActive
+                    ? 'background: var(--surface); border: 1px solid var(--border-strong);'
+                    : 'background: transparent; border: 1px solid transparent;';
+                item.innerHTML = `
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs font-medium truncate" style="color: ${isActive ? 'var(--text)' : 'var(--text-muted)'}">${escapeHtml(c.title || 'Untitled chat')}</div>
+                        <div class="text-[10px] mt-0.5 flex items-center gap-1.5" style="color: var(--text-faint)">
+                            <span>${c.message_count || 0} msg</span><span>·</span><span>${when}</span>
+                        </div>
+                    </div>
+                    <button class="opacity-0 group-hover:opacity-100 transition w-6 h-6 rounded flex items-center justify-center" title="Delete chat"
+                        style="color: var(--text-faint);" data-del="${c.id}">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6"/></svg>
+                    </button>`;
+                item.addEventListener('click', (e) => {
+                    if (e.target.closest('[data-del]')) return;
+                    openChat(c.id);
+                });
+                item.querySelector('[data-del]').addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (!confirm('Delete this chat?')) return;
+                    try {
+                        await api(`/api/chat/${c.id}`, { method: 'DELETE' });
+                        if (activeChatId === c.id) {
+                            activeChatId = null;
+                            startNewChat();
+                        }
+                        await refreshChatList();
+                    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+                });
+                wrap.appendChild(item);
             });
+        }
+
+        async function openChat(chatId) {
+            activeChatId = chatId;
+            try {
+                const data = await api(`/api/chat/${chatId}`);
+                renderActiveChat(data.chat);
+                renderChatList();
+            } catch (e) {
+                showToast('Failed to load chat', 'error');
+            }
+        }
+
+        function startNewChat() {
+            activeChatId = null;
+            renderActiveChat(null);
+            renderChatList();
+            setTimeout(() => document.getElementById('doubt-input')?.focus(), 100);
+        }
+
+        function renderActiveChat(chat) {
+            const wrap = document.getElementById('doubts-history');
+            const titleBar = document.getElementById('active-chat-title');
+            const suggestionsBox = document.getElementById('chat-suggestions');
+            const chips = document.getElementById('chat-suggestion-chips');
+
+            if (!chat) {
+                titleBar.classList.add('hidden');
+                wrap.innerHTML = `
+                    <div class="text-center py-10 px-4 animate-fade-in">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-2xl flex items-center justify-center" style="background: rgba(249,115,22,0.1); color: #F97316;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                        </div>
+                        <h4 class="font-semibold text-sm mb-1">Start a new conversation</h4>
+                        <p class="text-xs" style="color: var(--text-muted)">I remember everything from this chat. Reference earlier answers freely.</p>
+                    </div>`;
+
+                const suggestions = activeModuleDay
+                    ? ['Explain this module simply', 'What are the key takeaways?', 'Quiz me on this topic']
+                    : ['Make me a 1-week plan', 'What\'s the fastest way to learn this?', 'Recommend a 2026 cohort'];
+                chips.innerHTML = suggestions.map(s => `
+                    <button class="px-3 py-1.5 rounded-full text-xs transition" style="background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted)" data-suggest="${escapeHtml(s)}">${escapeHtml(s)}</button>
+                `).join('');
+                chips.querySelectorAll('[data-suggest]').forEach(b => {
+                    b.onclick = () => {
+                        const input = document.getElementById('doubt-input');
+                        input.value = b.dataset.suggest;
+                        autosizeDoubtInput();
+                        input.focus();
+                    };
+                });
+                suggestionsBox.classList.remove('hidden');
+                return;
+            }
+
+            titleBar.classList.remove('hidden');
+            titleBar.textContent = chat.title || 'Untitled chat';
+            suggestionsBox.classList.add('hidden');
+
+            wrap.innerHTML = '';
+            (chat.messages || []).forEach(m => appendMessage(m.question, m.answer));
             wrap.scrollTop = wrap.scrollHeight;
         }
+
+        function appendMessage(question, answer, opts = {}) {
+            const wrap = document.getElementById('doubts-history');
+            const node = document.createElement('div');
+            node.className = 'space-y-2 animate-fade-in-up';
+            const idAttr = opts.placeholderId ? `id="${opts.placeholderId}"` : '';
+            const answerHtml = opts.thinking
+                ? `<div ${idAttr} class="mr-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-md text-sm flex items-center gap-2" style="background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted);"><div class="spinner" style="width:12px;height:12px;border-width:1.5px"></div>Thinking…</div>`
+                : `<div ${idAttr} class="mr-auto group max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed relative" style="background: var(--surface-2); border: 1px solid var(--border); white-space: pre-wrap;">${renderAnswerMarkdown(answer || '')}<button class="copy-btn absolute top-1.5 right-1.5 w-6 h-6 opacity-0 group-hover:opacity-100 transition rounded flex items-center justify-center" style="background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);" title="Copy"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></div>`;
+            node.innerHTML = `
+                <div class="ml-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-br-md text-sm leading-relaxed"
+                     style="background: #F97316; color: white; white-space: pre-wrap;">${escapeHtml(question)}</div>
+                ${answerHtml}`;
+            wrap.appendChild(node);
+            // Wire up copy button if present
+            const copyBtn = node.querySelector('.copy-btn');
+            if (copyBtn) {
+                copyBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    try {
+                        await navigator.clipboard.writeText(answer || '');
+                        showToast('Copied');
+                    } catch { showToast('Copy failed', 'error'); }
+                };
+            }
+            wrap.scrollTop = wrap.scrollHeight;
+            return node;
+        }
+
+        function autosizeDoubtInput() {
+            const ta = document.getElementById('doubt-input');
+            ta.style.height = 'auto';
+            ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+        }
+
+        document.getElementById('doubt-input').addEventListener('input', autosizeDoubtInput);
+        document.getElementById('doubt-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('doubt-form').requestSubmit();
+            }
+        });
 
         let _doubtPending = 0;
         document.getElementById('doubt-form').addEventListener('submit', async (e) => {
@@ -1301,30 +2398,48 @@
             const input = document.getElementById('doubt-input');
             const q = input.value.trim();
             if (!q) return;
+
+            // Hide intro suggestions on first message
+            document.getElementById('chat-suggestions').classList.add('hidden');
+            const titleBar = document.getElementById('active-chat-title');
+            if (!activeChatId) {
+                titleBar.classList.remove('hidden');
+                titleBar.textContent = q.length > 60 ? q.slice(0, 60) + '…' : q;
+            }
+
+            // If history is showing the empty placeholder, clear it before appending
             const wrap = document.getElementById('doubts-history');
+            if (!wrap.querySelector('.space-y-2')) wrap.innerHTML = '';
+
             const thinkingId = 'thinking-' + (++_doubtPending);
-            const placeholder = document.createElement('div');
-            placeholder.className = 'space-y-2 animate-fade-in-up';
-            placeholder.innerHTML = `
-                <div class="ml-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-br-md text-sm leading-relaxed"
-                     style="background: #F97316; color: white;">${escapeHtml(q)}</div>
-                <div id="${thinkingId}" class="mr-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-md text-sm flex items-center gap-2"
-                     style="background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted);">
-                    <div class="spinner" style="width:12px;height:12px;border-width:1.5px"></div>
-                    Thinking…
-                </div>`;
-            wrap.appendChild(placeholder);
-            wrap.scrollTop = wrap.scrollHeight;
-            input.value = '';
+            appendMessage(q, '', { thinking: true, placeholderId: thinkingId });
+            input.value = ''; autosizeDoubtInput();
+
             try {
                 const fd = new FormData();
                 fd.append('question', q);
                 if (activeCurriculumId) fd.append('curriculum_id', activeCurriculumId);
                 if (activeModuleDay) fd.append('module_day', activeModuleDay);
+                if (activeChatId) fd.append('chat_id', activeChatId);
                 const data = await api('/api/doubt/ask', { method: 'POST', body: fd });
-                const node = document.getElementById(thinkingId);
-                if (node) node.outerHTML = `<div class="mr-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed" style="background: var(--surface-2); border: 1px solid var(--border); white-space: pre-wrap;">${renderAnswerMarkdown(data.answer || '')}</div>`;
-                wrap.scrollTop = wrap.scrollHeight;
+                if (data.chat_id) activeChatId = data.chat_id;
+
+                const placeholder = document.getElementById(thinkingId);
+                if (placeholder) {
+                    const finalAns = data.answer || '';
+                    const finalNode = document.createElement('div');
+                    finalNode.className = 'mr-auto group max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed relative';
+                    finalNode.style.cssText = 'background: var(--surface-2); border: 1px solid var(--border); white-space: pre-wrap;';
+                    finalNode.innerHTML = renderAnswerMarkdown(finalAns) +
+                        `<button class="copy-btn absolute top-1.5 right-1.5 w-6 h-6 opacity-0 group-hover:opacity-100 transition rounded flex items-center justify-center" style="background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);" title="Copy"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button>`;
+                    finalNode.querySelector('.copy-btn').onclick = async () => {
+                        try { await navigator.clipboard.writeText(finalAns); showToast('Copied'); }
+                        catch { showToast('Copy failed', 'error'); }
+                    };
+                    placeholder.replaceWith(finalNode);
+                }
+                document.getElementById('doubts-history').scrollTop = document.getElementById('doubts-history').scrollHeight;
+                refreshChatList();
             } catch (err) {
                 const node = document.getElementById(thinkingId);
                 if (node) node.outerHTML = `<div class="mr-auto max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm" style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #DC2626;">${escapeHtml(err.message || 'Could not reach the AI tutor.')}</div>`;
@@ -1358,6 +2473,46 @@
             document.getElementById('file-preview').classList.add('hidden');
         });
 
+        // =============================================================
+        //  TIMEFRAME / CADENCE SELECTOR
+        // =============================================================
+        function timeframeSummary(amount, unit) {
+            const n = Math.max(1, parseInt(amount, 10) || 1);
+            const labels = { min: 'minute', hour: 'hour', day: 'day', week: 'week' };
+            const label = labels[unit] || 'day';
+            const plural = n === 1 ? label : `${label}s`;
+            // 7 modules in the default plan, so total horizon = 7 × cadence.
+            const totalLabels = { min: 'min', hour: 'hr', day: 'day', week: 'wk' };
+            return `One module every ${n} ${plural} · ~${n * 7} ${totalLabels[unit] || 'day'} total`;
+        }
+
+        function formatCadence(amount, unit) {
+            const n = Math.max(1, parseInt(amount, 10) || 1);
+            const u = (unit || 'day').toLowerCase();
+            const word = ({ min: 'min', hour: 'hour', day: 'day', week: 'week' })[u] || 'day';
+            return `1 module / ${n} ${word}${n === 1 ? '' : 's'}`;
+        }
+
+        function setSelectedTimeframeUnit(unit) {
+            _selectedTimeframeUnit = unit;
+            document.querySelectorAll('#timeframe-unit-group .tf-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.tf === unit);
+            });
+            const help = document.getElementById('timeframe-help');
+            const amt = document.getElementById('timeframe-amount').value;
+            help.textContent = timeframeSummary(amt, unit);
+        }
+
+        document.querySelectorAll('#timeframe-unit-group .tf-btn').forEach(btn => {
+            btn.addEventListener('click', () => setSelectedTimeframeUnit(btn.dataset.tf));
+        });
+        document.getElementById('timeframe-amount').addEventListener('input', (e) => {
+            const help = document.getElementById('timeframe-help');
+            help.textContent = timeframeSummary(e.target.value, _selectedTimeframeUnit);
+        });
+        // Default to "1 day" so existing workflows don't change.
+        setSelectedTimeframeUnit('day');
+
         // Goal input — char count + animated underline
         const goalInput = document.getElementById('goal');
         const goalUnderline = document.getElementById('goal-underline');
@@ -1366,21 +2521,6 @@
         });
         goalInput.addEventListener('focus', () => goalUnderline.style.width = '100%');
         goalInput.addEventListener('blur', () => { if (!goalInput.value) goalUnderline.style.width = '0'; });
-
-        function switchTab(mode) {
-            currentMode = mode;
-            const tl = document.getElementById('tab-learning');
-            const ti = document.getElementById('tab-interview');
-            if (mode === 'learning') {
-                tl.classList.add('active'); ti.classList.remove('active');
-                document.getElementById('form-title').innerText = "What do you want to master today?";
-                goalInput.placeholder = "e.g., Learn Next.js and Tailwind from scratch";
-            } else {
-                ti.classList.add('active'); tl.classList.remove('active');
-                document.getElementById('form-title').innerText = "What role are you prepping for?";
-                goalInput.placeholder = "e.g., Senior Full Stack Developer interview";
-            }
-        }
 
         let agentTimer = null;
         function startAgentAnimation() {
@@ -1413,12 +2553,18 @@
             startAgentAnimation();
             const fd = new FormData();
             fd.append('goal', goal);
-            fd.append('mode', currentMode);
             if (selectedFile) fd.append('image', selectedFile);
+            const tfAmt = parseInt(document.getElementById('timeframe-amount').value, 10) || 1;
+            fd.append('timeframe_amount', String(Math.max(1, tfAmt)));
+            fd.append('timeframe_unit', _selectedTimeframeUnit);
             try {
                 const data = await api('/api/generate', { method: 'POST', body: fd });
                 lastGeneratedCurriculumId = data.data.curriculum_id;
                 stopAgentAnimation();
+                // The new curriculum may have a tighter cadence than what the
+                // routine was using — re-check so demos start polling fast
+                // without waiting for the next scheduled tick.
+                refreshRescheduleCadence();
                 document.getElementById('generate-success').classList.remove('hidden');
                 document.getElementById('goto-detail-btn').onclick = () => { if (lastGeneratedCurriculumId) openCurriculum(lastGeneratedCurriculumId); };
                 goalInput.value = '';
@@ -1427,6 +2573,11 @@
                 selectedFile = null;
                 fileUpload.value = '';
                 document.getElementById('file-preview').classList.add('hidden');
+                // Warn if calendar events failed to schedule.
+                const cs = data.data.calendar_status || {};
+                if (cs.expected > 0 && cs.booked < cs.expected) {
+                    showToast(`Heads up: only ${cs.booked}/${cs.expected} calendar events were created. Re-grant calendar access if this persists.`, 'error');
+                }
             } catch (err) {
                 document.getElementById('error-msg').textContent = err.message || 'Something went wrong.';
                 document.getElementById('error-banner').classList.remove('hidden');
@@ -1439,20 +2590,81 @@
         });
 
         // =============================================================
-        //  AUTO-RESCHEDULE
+        //  AUTO-RESCHEDULE — runs on dashboard open and on a cadence-aware
+        //  schedule while the tab is visible. The backend pushes every
+        //  pending session in a curriculum forward by one cadence step
+        //  whenever the user blows past the active module.
         // =============================================================
-        let _autoRescheduleRan = false;
-        async function maybeAutoReschedule() {
-            if (_autoRescheduleRan) return;
-            _autoRescheduleRan = true;
+        async function runRescheduleCheck(silent = false) {
+            if (!userAccessToken) return;
             try {
                 const data = await api('/api/reschedule', { method: 'POST', body: new FormData() });
-                const msg = data.message || '';
-                if (/rescheduled\s+([1-9]\d*)/i.test(msg)) {
-                    showToast(msg);
-                    loadDashboard();
+                if ((data.rescheduled || 0) > 0) {
+                    if (!silent) showToast(data.message);
+                    if (activeCurriculumId && !document.getElementById('detail-view').classList.contains('hidden')) {
+                        openCurriculum(activeCurriculumId);
+                    } else {
+                        loadDashboard();
+                    }
                 }
             } catch (e) { console.warn('Auto-reschedule skipped:', e.message); }
+        }
+
+        // Map a (timeframe_amount, timeframe_unit) cadence into a sensible
+        // poll interval. Demo cadences (5 min) need tight polling so missed
+        // modules slide forward right after they expire; longer cadences poll
+        // every few minutes since misses can't happen any faster than that.
+        function cadenceToPollMs(amount, unit) {
+            const n = Math.max(1, parseInt(amount, 10) || 1);
+            const u = (unit || 'day').toLowerCase();
+            const cadenceMs = u === 'min'  ? n * 60_000
+                            : u === 'hour' ? n * 3_600_000
+                            : u === 'day'  ? n * 86_400_000
+                            : u === 'week' ? n * 604_800_000
+                            :                86_400_000;
+            // Sample roughly twice per cadence, clamped to [20s, 5 min].
+            return Math.min(5 * 60_000, Math.max(20_000, Math.floor(cadenceMs / 2)));
+        }
+
+        async function refreshRescheduleCadence() {
+            // Ask the dashboard for the active curricula and pick the tightest
+            // cadence so a 5-min demo isn't held back by an old 1-day plan.
+            try {
+                const data = await api('/api/dashboard');
+                const cadences = (data.curricula || [])
+                    .map(c => cadenceToPollMs(c.timeframe_amount, c.timeframe_unit))
+                    .filter(Number.isFinite);
+                _rescheduleIntervalMs = cadences.length ? Math.min(...cadences) : 5 * 60_000;
+            } catch (e) {
+                _rescheduleIntervalMs = 5 * 60_000;
+            }
+            // Restart the timer with the new interval if it changed.
+            if (_rescheduleTimer) {
+                clearInterval(_rescheduleTimer);
+                _rescheduleTimer = setInterval(() => {
+                    if (!document.hidden) runRescheduleCheck(false);
+                }, _rescheduleIntervalMs);
+            }
+        }
+
+        function startRescheduleRoutine() {
+            if (_rescheduleTimer) return;
+            // First check fires immediately, then on the cadence-aware interval.
+            runRescheduleCheck(true);
+            refreshRescheduleCadence();
+            _rescheduleTimer = setInterval(() => {
+                if (!document.hidden) runRescheduleCheck(false);
+            }, _rescheduleIntervalMs);
+        }
+
+        function stopRescheduleRoutine() {
+            if (_rescheduleTimer) { clearInterval(_rescheduleTimer); _rescheduleTimer = null; }
+        }
+
+        // Backwards compat with the old call site in showView('dashboard').
+        function maybeAutoReschedule() {
+            runRescheduleCheck(true);
+            refreshRescheduleCadence();
         }
 
         // =============================================================

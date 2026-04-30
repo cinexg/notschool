@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from core.state import NotschoolState
 from db.crud import add_curriculum, add_session
+from agents.scheduler_node import compute_module_slot, timeframe_to_timedelta
 
 
 def db_node(state: NotschoolState) -> dict:
@@ -29,8 +30,11 @@ def db_node(state: NotschoolState) -> dict:
     event_links = state.get("calendar_event_links", []) or []
     opportunities = state.get("industry_opportunities", []) or []
     web_trends = state.get("web_trends", []) or []
+    timeframe_amount = int(state.get("timeframe_amount") or 1)
+    timeframe_unit = (state.get("timeframe_unit") or "day").lower()
 
-    # 1. Persist the curriculum record
+    # 1. Persist the curriculum record (with timeframe metadata so the
+    #    rescheduler can replay the same cadence on missed sessions).
     curriculum_id = add_curriculum(
         user_id=user_id,
         goal=goal,
@@ -40,6 +44,8 @@ def db_node(state: NotschoolState) -> dict:
         youtube_urls=youtube_urls,
         opportunities=opportunities,
         web_trends=web_trends,
+        timeframe_amount=timeframe_amount,
+        timeframe_unit=timeframe_unit,
     )
 
     saved = 0
@@ -52,9 +58,17 @@ def db_node(state: NotschoolState) -> dict:
 
             topic = mod.get("topic", f"Module {i+1}")
             description = mod.get("description", "")
-            day_offset = mod.get("day", i + 1)
-            duration = float(mod.get("duration_hours", 1) or 1)
-            start_time = now + timedelta(days=day_offset)
+            try:
+                day_label = int(mod.get("day", i + 1))
+            except (TypeError, ValueError):
+                day_label = i + 1
+            try:
+                duration = float(mod.get("duration_hours", 1) or 1)
+            except (TypeError, ValueError):
+                duration = 1.0
+            # Match the scheduler exactly so the DB row's scheduled_time agrees
+            # with the actual Google Calendar event start.
+            start_time = compute_module_slot(now, i, timeframe_amount, timeframe_unit)
 
             event_id = event_ids[i] if i < len(event_ids) else None
             event_link = event_links[i] if i < len(event_links) else None
@@ -66,7 +80,7 @@ def db_node(state: NotschoolState) -> dict:
                 goal=goal,
                 module_name=topic,
                 module_description=description,
-                module_day=day_offset,
+                module_day=day_label,
                 duration_hours=duration,
                 scheduled_time=start_time.strftime("%Y-%m-%d %H:%M:%S"),
                 event_link=event_link or None,

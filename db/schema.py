@@ -35,6 +35,14 @@ def init_db():
         )
     ''')
 
+    # Migrations for users (profile personalisation fields)
+    _add_column_if_missing(cursor, "users", "display_name TEXT")
+    _add_column_if_missing(cursor, "users", "age INTEGER")
+    _add_column_if_missing(cursor, "users", "skills TEXT")
+    _add_column_if_missing(cursor, "users", "interests TEXT")
+    _add_column_if_missing(cursor, "users", "learning_style TEXT")
+    _add_column_if_missing(cursor, "users", "profile_updated_at TEXT")
+
     # Curricula (one per generation)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS curricula (
@@ -51,6 +59,12 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users(user_id)
         )
     ''')
+
+    # Timeframe spacing — controls how far apart consecutive modules are scheduled.
+    # `unit` is one of: 'min', 'hour', 'day', 'week'. Default is 1 day so existing
+    # rows continue to behave as before the migration.
+    _add_column_if_missing(cursor, "curricula", "timeframe_amount INTEGER DEFAULT 1")
+    _add_column_if_missing(cursor, "curricula", "timeframe_unit TEXT DEFAULT 'day'")
 
     # Study Sessions (per module)
     cursor.execute('''
@@ -73,6 +87,7 @@ def init_db():
     _add_column_if_missing(cursor, "study_sessions", "module_description TEXT")
     _add_column_if_missing(cursor, "study_sessions", "duration_hours REAL")
     _add_column_if_missing(cursor, "study_sessions", "youtube_url TEXT")
+    _add_column_if_missing(cursor, "study_sessions", "completed_at TEXT")
 
     # Quizzes
     cursor.execute('''
@@ -106,12 +121,31 @@ def init_db():
         )
     ''')
 
+    # Migrations for doubts (chat threading)
+    _add_column_if_missing(cursor, "doubts", "chat_id INTEGER")
+
+    # Chat threads — groups doubts into a multi-turn conversation
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS chats (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            curriculum_id INTEGER,
+            module_day INTEGER,
+            title TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        )
+    ''')
+
     # Useful indexes
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_curricula_user ON curricula(user_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_sessions_user ON study_sessions(user_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_sessions_curriculum ON study_sessions(curriculum_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_quizzes_curriculum ON quizzes(curriculum_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_doubts_user ON doubts(user_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_doubts_chat ON doubts(chat_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_chats_user ON chats(user_id)")
 
     conn.commit()
     conn.close()

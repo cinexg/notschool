@@ -53,18 +53,25 @@ def search_industry_opportunities(goal: str, num_results: int = 5) -> List[dict]
     Returns structured results with title, url, and description.
     """
     try:
-        query = f"{goal} cohort program bootcamp certification hackathon 2025 2026 apply enroll"
+        query = f"{goal} 2026 cohort Google Amazon Microsoft bootcamp certification program apply"
         with DDGS() as ddgs:
-            raw = ddgs.text(query, max_results=num_results)
-            results = [
-                {
-                    "title": r.get("title", "Opportunity"),
-                    "url": r.get("href", ""),
+            raw = list(ddgs.text(query, max_results=num_results)) or []
+            results = []
+            for r in raw:
+                url = r.get("href", "") or ""
+                title = (r.get("title") or "Initiative").strip()
+                provider = ""
+                low = (url + " " + title).lower()
+                if "google" in low or "deepmind" in low: provider = "Google"
+                elif "amazon" in low or "aws" in low: provider = "Amazon"
+                elif "microsoft" in low or "azure" in low or "github.com" in low: provider = "Microsoft"
+                results.append({
+                    "title": title,
+                    "url": url,
                     "description": (r.get("body", "") or "")[:160].strip(),
-                    "source": "live"
-                }
-                for r in raw
-            ]
+                    "provider": provider,
+                    "source": "live",
+                })
         return results
     except Exception as e:
         return [{"title": "Search unavailable", "url": "", "description": str(e), "source": "error"}]

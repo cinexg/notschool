@@ -6,7 +6,7 @@ class NotschoolState(TypedDict):
     """Unified state schema for the Notschool OS orchestrator."""
     # User Inputs
     goal: str
-    mode: str  # "learning" or "interview"
+    mode: str  # currently always "learning" — kept for forward compatibility
     image_bytes: Optional[bytes]
     image_mime_type: Optional[str]
     user_access_token: Optional[str]
@@ -29,3 +29,9 @@ class NotschoolState(TypedDict):
     # Context
     user_timezone: str
     current_timestamp: str
+    user_profile: Optional[dict[str, Any]]
+
+    # Scheduling cadence — N units between consecutive modules.
+    # unit ∈ {"min", "hour", "day", "week"}. Defaults to (1, "day").
+    timeframe_amount: Optional[int]
+    timeframe_unit: Optional[str]
