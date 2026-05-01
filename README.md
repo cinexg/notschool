@@ -41,6 +41,7 @@ Beyond generation, Notschool OS provides a full learning dashboard: progress tra
 - **Custom roadmap visualisation.** A bespoke timeline chart showing day badges, status colours (done / up-next / overdue), and on-hover module descriptions for a clean at-a-glance read with detail one hover away.
 - **Dashboard analytics.** Day streak (current and best), weekly velocity, completion percentage, and quiz accuracy.
 - **Light and dark themes**, system-preference aware, with a one-click toggle.
+- **Mobile-first responsive UI.** Every view — from the generator form to the planner action grid to the AI tutor — has been designed to work cleanly on phones as well as desktops. The layout adapts at 480/640/768 px breakpoints, all interactive controls hit the 44 × 44 px touch-target minimum, modals slide up as bottom sheets, the AI tutor's chat list opens as an overlay drawer on small screens, and form inputs use a 16 px font so iOS Safari does not auto-zoom on focus. The viewport respects the iPhone safe-area inset so the floating "Ask a doubt" FAB never sits under the home-indicator gesture bar. `prefers-reduced-motion` is honored throughout.
 
 ---
 
@@ -85,7 +86,7 @@ The pipeline is implemented as a directed LangGraph state machine. Each node is 
 | Orchestration | LangGraph |
 | LLMs | Gemini (via `google-genai` SDK) — used by Architect, quiz generator, and AI tutor |
 | Backend | FastAPI + Uvicorn |
-| Frontend | HTML5, Tailwind CSS (CDN), Vanilla JS — single-page app with no build step |
+| Frontend | HTML5, Tailwind CSS (CDN), Vanilla JS — single-page app with no build step. Mobile-first responsive layout, safe-area aware, with a custom in-app confirmation dialog (no native `confirm()` popups). |
 | Database | SQLite3 |
 | Tool Integration | Model Context Protocol (MCP) over stdio via FastMCP |
 | External APIs | YouTube Data API v3, Google Calendar API (OAuth 2.0), Google Identity (OAuth) |
@@ -302,7 +303,13 @@ The user's Google access token is passed with each request and used transiently.
 Evaluators need a one-click way to try the product without surrendering a Google account, but the rest of the system already runs stateless on per-request tokens. A signed token over `guest_<id>` matches that model exactly: the server can authenticate any guest by recomputing the signature with `GUEST_TOKEN_SECRET`, no session lookup table, no expiring rows to garbage-collect. Tampering invalidates the signature, and rotating the secret instantly revokes every outstanding guest token at once.
 
 **Why a custom roadmap chart instead of Mermaid?**
-The earlier Mermaid graph rendered as a tiny vertical chain that was hard to read on mobile and failed to surface module status, descriptions, or duration. The bespoke timeline chart renders the same information in a single glance, integrates session state (done / up-next / overdue), and animates in for visual polish — without pulling in a 1MB dependency.
+The earlier Mermaid graph rendered as a tiny vertical chain that was hard to read on mobile and failed to surface module status, descriptions, or duration. The bespoke timeline chart renders the same information in a single glance, integrates session state (done / up-next / overdue), and animates in for visual polish — without pulling in a 1MB dependency. On phones the chart shrinks the day-circle, drops the hover-only description into a permanently-visible block, and stacks the status badges below the topic so a 360 px screen still reads cleanly.
+
+**Why a custom confirmation dialog instead of `window.confirm()`?**
+Native `confirm()` popups are jarring inside a full-screen webapp, particularly on iOS where the system dialog visually breaks out of the app's chrome. A small in-app dialog (`showConfirm()`) styled to match the rest of the design lets us add a clear destructive-action red, distinct verbs ("Delete" vs "Confirm"), explanatory body copy, and a friendlier bottom-sheet animation on phones. The same primitive is used for roadmap deletion, quiz regeneration, unanswered-quiz submission warnings, and chat thread deletion.
+
+**Why the action grid renders as `4 + 1` on phones?**
+The planner row exposes five actions per session — Video, Calendar, Quiz, Doubt, and Mark done. On desktop a five-column row reads like a menu. On phones five buttons in two columns produced a lopsided grid (3 + 2) and the most important action — Mark done — fell into the second column where it competed with secondary actions. The mobile layout collapses the four secondary actions to icon-only in one row of four, and gives Mark done a full-width row of its own. The primary CTA is always reachable with a single thumb.
 
 **Why DuckDuckGo Search instead of Google Search?**
 The `googlesearch-python` library scrapes Google directly and is rate-limited aggressively (HTTP 429) on shared cloud IPs. The `duckduckgo-search` library uses an unofficial API that is not subject to the same restrictions and does not require an API key.
