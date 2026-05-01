@@ -17,6 +17,7 @@ from core.graph import notschool_app
 from db.schema import init_db, DB_FILE
 from db import crud
 from tools.auth_client import verify_google_token
+from tools.guest_auth import issue_guest_token, verify_guest_token, is_guest_token
 from tools.calendar_client import (
     create_calendar_event,
     delete_calendar_event,
@@ -47,10 +48,30 @@ def _require_user(authorization: Optional[str]) -> dict:
     """
     Verifies the Bearer token and returns the user info dict.
     Raises 401 on failure.
+
+    Accepts two token shapes:
+      - Google OAuth access tokens (full features, including Calendar sync).
+      - HMAC-signed guest tokens issued by /api/auth/guest (no Calendar; lets
+        evaluators try the product without a Google account).
     """
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or malformed Authorization header")
     token = authorization.split(" ", 1)[1].strip()
+
+    if is_guest_token(token):
+        info = verify_guest_token(token)
+        if not info:
+            raise HTTPException(status_code=401, detail="Invalid or expired guest token")
+        crud.upsert_user(
+            user_id=info["sub"],
+            email=info["email"],
+            name=info.get("name"),
+            picture=info.get("picture"),
+        )
+        # Empty access_token signals "no Google scope" to downstream callers
+        # (calendar_client treats it as a no-op).
+        return {**info, "access_token": "", "is_guest": True}
+
     info = verify_google_token(token)
     if not info:
         raise HTTPException(status_code=401, detail="Invalid or expired Google access token")
@@ -60,7 +81,7 @@ def _require_user(authorization: Optional[str]) -> dict:
         name=info.get("name"),
         picture=info.get("picture"),
     )
-    return {**info, "access_token": token}
+    return {**info, "access_token": token, "is_guest": False}
 
 
 # ---------------- ROUTES ----------------
@@ -94,6 +115,40 @@ async def auth_verify(authorization: Optional[str] = Header(None)):
             "email": user["email"],
             "name": user.get("name"),
             "picture": user.get("picture"),
+            "is_guest": bool(user.get("is_guest")),
+            "profile": _profile_payload(profile),
+        },
+    }
+
+
+@app.post("/api/auth/guest")
+async def auth_guest():
+    """Issue a fresh guest identity. Lets evaluators explore Notschool without
+    a Google account — Calendar sync is disabled for guests, but generation,
+    quizzes, doubts, and the dashboard all work end-to-end.
+
+    No request body is required. We deliberately avoid `Form(None)` here because
+    fetch() sending an empty FormData() produces a multipart body with zero
+    parts, which python-multipart rejects as "There was an error parsing the
+    body".
+    """
+    info = issue_guest_token(name=None)
+    crud.upsert_user(
+        user_id=info["user_id"],
+        email=info["email"],
+        name=info["name"],
+        picture=None,
+    )
+    profile = crud.get_user(info["user_id"]) or {}
+    return {
+        "status": "success",
+        "token": info["token"],
+        "user": {
+            "user_id": info["user_id"],
+            "email": info["email"],
+            "name": info["name"],
+            "picture": None,
+            "is_guest": True,
             "profile": _profile_payload(profile),
         },
     }
@@ -268,6 +323,8 @@ async def get_dashboard(authorization: Optional[str] = Header(None)):
                     next_session = {
                         **s,
                         "curriculum_title": c.get("title") or c.get("goal"),
+                        "timeframe_unit": c.get("timeframe_unit"),
+                        "timeframe_amount": c.get("timeframe_amount"),
                     }
         enriched.append({
             **c,
@@ -286,6 +343,7 @@ async def get_dashboard(authorization: Optional[str] = Header(None)):
             "email": user["email"],
             "name": user.get("name"),
             "picture": user.get("picture"),
+            "is_guest": bool(user.get("is_guest")),
         },
         "curricula": enriched,
         "next_session": next_session,
@@ -666,9 +724,11 @@ def _reschedule_curriculum(
             duration_hours = 1.0
         # Mirror the per-cadence event-length clamp the scheduler applies on
         # initial generation so reschedules don't blow up to 1h slots inside
-        # 5-min demos.
+        # 5-min demos. Cap at cadence - 1 minute so consecutive sessions never
+        # overlap on the user's calendar.
         cadence_min = max(1, int(delta.total_seconds() / 60))
-        event_minutes = max(5, min(int(duration_hours * 60), max(5, cadence_min // 2)))
+        max_event = max(1, cadence_min - 1)
+        event_minutes = max(1, min(int(duration_hours * 60), max_event))
         new_end = new_start + timedelta(minutes=event_minutes)
 
         summary = f"📚 Notschool · Day {s.get('module_day') or '?'}: {s.get('module_name', 'Session')}"

@@ -22,7 +22,7 @@ Beyond generation, Notschool OS provides a full learning dashboard: progress tra
 | Store and Retrieve Structured Data | SQLite persists users, curricula, study sessions, quizzes, doubts, and chat threads. Stats, streaks, and quiz progress are computed at read time. |
 | Integrate Tools via MCP | YouTube search and Google Calendar creation are exposed as MCP tools through a FastMCP server over stdio transport. |
 | Multi-Step Workflow | Goal input → multimodal curriculum generation → resource retrieval → calendar scheduling → persistence — executed as a typed LangGraph state machine. |
-| API-based System | All logic is served through a FastAPI backend with twenty REST endpoints covering auth, generation, dashboard, profile, quizzes, doubts, chats, and scheduling. |
+| API-based System | All logic is served through a FastAPI backend with twenty-one REST endpoints covering auth (Google + guest), generation, dashboard, profile, quizzes, doubts, chats, and scheduling. |
 
 ---
 
@@ -30,8 +30,9 @@ Beyond generation, Notschool OS provides a full learning dashboard: progress tra
 
 - **Multi-modal curriculum generation.** Upload a photo of a syllabus or job description; the Architect agent extracts topics and produces a structured 7-day plan.
 - **Profile-aware personalisation.** Per-user profile (display name, age, skills, interests, learning style) is fed into both the curriculum generator and the AI tutor so output is calibrated to the learner.
-- **Auto-scheduling on Google Calendar.** Every module becomes a calendar event using the user's OAuth token, dynamically sized by the module's `duration_hours`.
-- **Configurable cadence.** At generation time the user picks how far apart consecutive modules sit — `N min`, `N hour`, `N day`, or `N week`. Short cadences power live demos (a 5-minute cadence lets the auto-rescheduler be observed end-to-end without waiting a day); long cadences match a real study schedule.
+- **Guest mode for zero-friction evaluation.** Evaluators without a Google account can launch a sandbox session in one click. A warning modal lists exactly what works (roadmaps, quizzes, tutor, dashboard, profile) and what doesn't (Google Calendar sync, email reminders), and surfaces a copyable test account for anyone who wants the full Calendar flow. Guest sessions are authenticated with HMAC-signed tokens — no Google scope is requested or stored.
+- **Auto-scheduling on Google Calendar.** Every module becomes a calendar event using the user's OAuth token, sized by the module's `duration_hours` and clamped to one minute below the cadence so consecutive sessions never overlap (a 1-hour cadence with 1-hour modules generates 59-minute events, not back-to-back collisions).
+- **Configurable cadence.** At generation time the user picks how far apart consecutive modules sit — `N min`, `N hour`, `N day`, or `N week`. Short cadences power live demos (a 5-minute cadence lets the auto-rescheduler be observed end-to-end without waiting a day); long cadences match a real study schedule. The roadmap chart, planner, and dashboard all relabel and reformat per cadence — `Day 1` for daily plans, `Slot 1` with the actual clock-time for sub-day plans, and `Wk 1` for weekly plans — so the timeline always matches reality.
 - **Push-forward auto-rescheduling.** When the active module's window elapses without being marked done, that module slides into the next slot, the next module slides one slot further, and so on — preserving the original spacing. The Calendar event is patched in place (not deleted and recreated) so reminders persist. The dashboard polls on a cadence-aware interval (twice per cadence, clamped to 20s–5min) so a 5-min demo reschedule fires within ~2.5 minutes of the miss.
 - **Sequential completion.** A module can only be marked done once every earlier module is finished. The lock is enforced both in the UI (subsequent rows render a "Locked" button) and on the backend (HTTP 409 with a clear message), so the order can't be bypassed via direct API calls.
 - **Per-module quizzes.** Five-question multiple-choice quizzes are generated on demand, scored, persisted, and aggregated into accuracy and points-earned metrics.
@@ -103,7 +104,7 @@ The primary reasoning agent. Calls Gemini with either a text prompt or a multimo
 The resource curation agent. Reads `search_queries` from the Architect's output and calls the YouTube Data API to retrieve one tutorial video per query. Results are stored alongside the corresponding session so the planner can render a "Watch video" button per module.
 
 ### Scheduler — `agents/scheduler_node.py`
-The calendar agent. Uses the user's OAuth 2.0 access token (passed at request time, never stored server-side) to create a Google Calendar event per module. Event duration is derived from the `duration_hours` field of each module. If a token is missing or revoked, the step is skipped gracefully and a `calendar_status` object surfaces the gap to the frontend.
+The calendar agent. Uses the user's OAuth 2.0 access token (passed at request time, never stored server-side) to create a Google Calendar event per module. Event duration is derived from the module's `duration_hours` field, then clamped to `cadence − 1 minute` so consecutive events never overlap on tight cadences (a 1-minute demo creates 1-minute events; a 1-hour cadence with 1-hour modules creates 59-minute events). For sub-day cadences the first event starts ~1 minute after generation so the rescheduler can be observed end-to-end; for day/week cadences each module anchors to a 10:00 local-time slot. If the access token is missing (guest mode) or revoked, the step is skipped gracefully and a `calendar_status` object surfaces the gap to the frontend.
 
 ### DB Saver — `agents/db_node.py`
 The persistence agent. Writes the curriculum row plus one `study_sessions` row per module, including goal, module name, scheduled timestamp, calendar event id, calendar link, and YouTube URL. These rows are later read by the dashboard, the planner, and the rescheduler.
@@ -112,12 +113,18 @@ The persistence agent. Writes the curriculum row plus one `study_sessions` row p
 
 ## API Endpoints
 
-All authenticated endpoints expect a `Bearer` access token in the `Authorization` header obtained via the Google OAuth client.
+All authenticated endpoints expect a `Bearer` token in the `Authorization` header. The token can be either:
+
+- A Google OAuth access token (full features, including Calendar sync), or
+- An HMAC-signed guest token issued by `/api/auth/guest` (Calendar features skipped; everything else works).
+
+The same `_require_user` dependency handles both shapes — Google tokens are validated against Google's userinfo endpoint, guest tokens are verified by recomputing the signature with the server's `GUEST_TOKEN_SECRET`.
 
 ### Auth and profile
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/api/auth/verify` | Verifies the Google access token, registers the user, and returns the profile. |
+| `POST` | `/api/auth/verify` | Verifies the bearer token (Google access token *or* HMAC-signed guest token), registers/updates the user, and returns the profile. |
+| `POST` | `/api/auth/guest` | Issues a fresh guest identity + HMAC-signed token. No body required. Calendar features stay disabled for the resulting session. |
 | `GET` | `/api/profile` | Returns the user's personalisation profile. |
 | `PUT` | `/api/profile` | Updates display name, age, skills, interests, and learning style. |
 
@@ -202,6 +209,7 @@ notschool/
 │   ├── youtube_client.py     YouTube Data API v3 wrapper
 │   ├── calendar_client.py    Google Calendar API OAuth wrapper
 │   ├── auth_client.py        Google access-token verification
+│   ├── guest_auth.py         HMAC-signed guest tokens for the no-Google evaluator flow
 │   ├── gemini_client.py      Gemini SDK wrapper with model fallback and retries
 │   ├── quiz_generator.py     Quiz generation via Gemini
 │   └── doubt_resolver.py     Multi-turn AI tutor with profile and history context
@@ -245,16 +253,22 @@ Obtain credentials for the following:
    YOUTUBE_API_KEY=your_youtube_api_key
    GOOGLE_CLIENT_ID=your_oauth_client_id
    GOOGLE_CLIENT_SECRET=your_oauth_client_secret
+
+   # Optional but strongly recommended in any shared deployment — used to sign
+   # guest tokens. Falls back to a baked-in dev secret if unset, which means
+   # guest tokens issued by one server instance would also validate on another
+   # instance using the default; set this to a random ≥32-char string in prod.
+   GUEST_TOKEN_SECRET=replace_with_a_long_random_string
    ```
 
-4. Update the `client_id` in `frontend/index.html` to match your OAuth Client ID.
+4. Update the `client_id` in `frontend/index.html` to match your OAuth Client ID, and (optionally) replace the placeholder test-account credentials shown in the guest-mode warning modal with the real shared evaluation account email/password.
 
 5. Start the server:
    ```bash
    uvicorn main:app --reload
    ```
 
-6. Open `http://localhost:8000` in your browser, sign in with Google, and complete your profile so the AI personalises your roadmap.
+6. Open `http://localhost:8000`. Sign in with Google for the full experience, or click **Continue as Guest** to launch a sandbox session immediately. Either way, completing your profile lets the AI personalise your roadmap.
 
 ### Cloud Run deployment
 
@@ -282,7 +296,10 @@ LangGraph provides a typed shared state (`NotschoolState`) that flows through ev
 Exposing tools via the Model Context Protocol decouples implementations from agent logic. The same MCP server can be connected to any MCP-compatible client, making the toolset reusable outside this pipeline.
 
 **Why per-request OAuth tokens instead of server-stored credentials?**
-The user's Google access token is passed with each request and used transiently. The server never stores or caches credentials, eliminating an entire class of token-management failure modes and keeping the architecture stateless.
+The user's Google access token is passed with each request and used transiently. The server never stores or caches Google credentials, eliminating an entire class of token-management failure modes and keeping the architecture stateless.
+
+**Why HMAC-signed guest tokens instead of a database session table?**
+Evaluators need a one-click way to try the product without surrendering a Google account, but the rest of the system already runs stateless on per-request tokens. A signed token over `guest_<id>` matches that model exactly: the server can authenticate any guest by recomputing the signature with `GUEST_TOKEN_SECRET`, no session lookup table, no expiring rows to garbage-collect. Tampering invalidates the signature, and rotating the secret instantly revokes every outstanding guest token at once.
 
 **Why a custom roadmap chart instead of Mermaid?**
 The earlier Mermaid graph rendered as a tiny vertical chain that was hard to read on mobile and failed to surface module status, descriptions, or duration. The bespoke timeline chart renders the same information in a single glance, integrates session state (done / up-next / overdue), and animates in for visual polish — without pulling in a 1MB dependency.

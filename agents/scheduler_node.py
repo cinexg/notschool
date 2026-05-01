@@ -104,10 +104,14 @@ def scheduler_node(state: NotschoolState) -> dict:
                 day_label = i + 1
 
             start_time = compute_module_slot(now, i, timeframe_amount, timeframe_unit)
-            # For minute / hour cadences a literal 1+ hour event would cover the
-            # whole cycle and confuse the user — clamp duration to half the cadence.
+            # Cap each event at one minute below the cadence so consecutive
+            # sessions never overlap on Google Calendar — a 60-min cadence with
+            # 1h modules would otherwise butt directly into the next event and
+            # confuse the user. Day/week cadences are large enough that the
+            # raw duration_hours value passes through unchanged.
             cadence_minutes = max(1, int(timeframe_to_timedelta(timeframe_amount, timeframe_unit).total_seconds() / 60))
-            event_minutes = max(5, min(int(duration * 60), max(5, cadence_minutes // 2)))
+            max_event = max(1, cadence_minutes - 1)
+            event_minutes = max(1, min(int(duration * 60), max_event))
             end_time = start_time + timedelta(minutes=event_minutes)
 
             summary = f"📚 Notschool · Day {day_label}: {topic}"
