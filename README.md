@@ -231,9 +231,9 @@ notschool/
 
 Obtain credentials for the following:
 
-- **Gemini** — Google AI Studio API key.
-- **YouTube Data API v3** — API key from the Google Cloud Console.
-- **Google OAuth 2.0** — Client ID for an authorised JavaScript origin matching the deployment URL. The Calendar API must be enabled on the same Cloud project.
+- **Gemini** - Google AI Studio API key.
+- **YouTube Data API v3** - API key from the Google Cloud Console.
+- **Google OAuth 2.0** - Client ID for an authorised JavaScript origin matching the deployment URL. The Calendar API must be enabled on the same Cloud project.
 
 ### Local installation
 
