@@ -21,7 +21,7 @@ Beyond generation, Notschool provides a full learning dashboard: progress tracki
 | Primary Agent + Sub-Agents | LangGraph orchestrates four specialised agents: Architect, Librarian, Scheduler, and DB Saver. The Architect acts as the primary reasoning agent. |
 | Store and Retrieve Structured Data | SQLite persists users, curricula, study sessions, quizzes, doubts, and chat threads. Stats, streaks, and quiz progress are computed at read time. |
 | Integrate Tools via MCP | YouTube search and Google Calendar creation are exposed as MCP tools through a FastMCP server over stdio transport. |
-| Multi-Step Workflow | Goal input → multimodal curriculum generation → resource retrieval → calendar scheduling → persistence — executed as a typed LangGraph state machine. |
+| Multi-Step Workflow | Goal input → multimodal curriculum generation -> resource retrieval → calendar scheduling → persistence — executed as a typed LangGraph state machine. |
 | API-based System | All logic is served through a FastAPI backend with twenty-one REST endpoints covering auth (Google + guest), generation, dashboard, profile, quizzes, doubts, chats, and scheduling. |
 
 ---
