@@ -35,6 +35,15 @@ def _is_quota(exc: Exception) -> bool:
     return "429" in msg or "RESOURCE_EXHAUSTED" in msg or "quota" in msg.lower()
 
 
+def _is_model_unavailable(exc: Exception) -> bool:
+    """A specific model was retired/restricted (e.g. 404 'no longer available to
+    new users'). Unlike quota/transient errors this is permanent for that model,
+    but says nothing about the next one in the chain — so it should also
+    advance the fallback loop instead of aborting it."""
+    msg = str(exc)
+    return "404" in msg or "NOT_FOUND" in msg
+
+
 def get_client() -> genai.Client:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -77,8 +86,9 @@ def generate_with_fallback(
             return _call()
         except Exception as e:
             last_exc = e
-            if _is_quota(e) or is_transient(e):
-                # Quota OR transient (503/UNAVAILABLE) — try the next model.
+            if _is_quota(e) or is_transient(e) or _is_model_unavailable(e):
+                # Quota, transient (503/UNAVAILABLE), or this specific model being
+                # retired/restricted (404) — try the next model.
                 continue
             # Genuine non-recoverable error — surface immediately.
             raise
